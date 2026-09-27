@@ -7,9 +7,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-AGENDA_URL = "https://www.musee-orsay.fr/fr/programme/agenda/expositions"
+URL = "https://www.musee-orsay.fr/fr/programme/agenda"
 VENUE = "Musée d'Orsay"
-BASE_URL = "https://www.musee-orsay.fr"
 
 MONTHS = {
     "janvier": 1,
@@ -40,8 +39,7 @@ def parse_date_range(text):
     text = text.replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
-    # Exemple :
-    # Du 20 octobre 2026 au 21 février 2027
+    # Du 29 septembre 2026 au 10 janvier 2027
     pattern = (
         r"Du\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
@@ -68,74 +66,98 @@ def parse_date_range(text):
 
         return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
-    # Exemple :
-    # Du 22 septembre au 06 décembre 2026
+    # Jusqu'au 31 janvier 2027
     pattern = (
-        r"Du\s+"
-        r"(\d{1,2})\s+([a-zéû]+)"
-        r"\s+au\s+"
+        r"Jusqu'au\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
     )
 
     match = re.search(pattern, text, re.IGNORECASE)
 
     if match:
-        day1, month1, day2, month2, year2 = match.groups()
-
-        start = datetime(
-            int(year2),
-            MONTHS[month1.lower()],
-            int(day1),
-        )
+        day, month, year = match.groups()
 
         end = datetime(
-            int(year2),
-            MONTHS[month2.lower()],
-            int(day2),
+            int(year),
+            MONTHS[month.lower()],
+            int(day),
         )
 
-        return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
+        # Pour une exposition déjà en cours, la date de début
+        # doit être récupérée sur la fiche individuelle.
+        return None, end.strftime("%Y-%m-%d")
 
     return None
 
 
-def get_exhibition_links():
+def get_page():
     response = requests.get(
-        AGENDA_URL,
+        URL,
         timeout=30,
         headers=HEADERS,
     )
 
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    return BeautifulSoup(response.text, "html.parser")
 
-    links = []
 
-    for link in soup.find_all("a", href=True):
-        href = link["href"]
+def get_exhibition_section(soup):
+    for heading in soup.find_all(["h2", "h3"]):
+        if heading.get_text(" ", strip=True) == "Expositions":
+            return heading
 
-        if not href.startswith("/fr/programme/agenda/expositions/"):
+    raise RuntimeError(
+        "Section 'Expositions' introuvable sur l'agenda d'Orsay."
+    )
+
+
+def get_exhibition_cards(section):
+    """
+    Récupère les cartes situées dans la section Expositions.
+
+    On s'arrête dès que l'on atteint la section suivante
+    de l'agenda.
+    """
+
+    cards = []
+
+    current = section
+
+    while current is not None:
+        current = current.find_next()
+
+        if current is None:
+            break
+
+        # Une nouvelle section de niveau 2 marque la fin
+        # de la section Expositions.
+        if (
+            current.name == "h2"
+            and current.get_text(" ", strip=True) != "Expositions"
+        ):
+            break
+
+        if current.name != "article":
             continue
 
-        if href == "/fr/programme/agenda/expositions/":
+        text = current.get_text(" ", strip=True)
+
+        if not text:
             continue
 
-        full_url = BASE_URL + href
+        cards.append(current)
 
-        if full_url not in links:
-            links.append(full_url)
-
-    if not links:
-        raise RuntimeError(
-            "Aucune fiche d'exposition trouvée sur la page d'Orsay."
-        )
-
-    return links
+    return cards
 
 
-def find_category(page_text):
-    categories = [
+def scrape_card(card):
+    text = card.get_text(" ", strip=True)
+
+    # Chercher la catégorie.
+    category = None
+
+    for candidate in [
         "Exposition au musée",
         "Exposition contemporaine",
         "Accrochage",
@@ -143,93 +165,80 @@ def find_category(page_text):
         "Présentation exceptionnelle",
         "Expérience immersive",
         "Exposition hors les murs",
-    ]
-
-    # La catégorie se trouve au début de la fiche,
-    # avant le titre principal.
-    beginning = page_text[:2500]
-
-    positions = []
-
-    for category in categories:
-        position = beginning.find(category)
-
-        if position != -1:
-            positions.append((position, category))
-
-    if not positions:
-        return None
-
-    positions.sort(key=lambda item: item[0])
-
-    return positions[0][1]
-
-
-def scrape_exhibition(url):
-    response = requests.get(
-        url,
-        timeout=30,
-        headers=HEADERS,
-    )
-
-    response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    page_text = soup.get_text(" ", strip=True)
-
-    category = find_category(page_text)
+    ]:
+        if candidate in text:
+            category = candidate
+            break
 
     if category is None:
         return None
 
+    # Exclusions décidées pour Imago.
     if category in EXCLUDED_CATEGORIES:
         return None
 
-    h1 = soup.find("h1")
+    # Le titre est généralement le H3 de la carte.
+    heading = card.find("h3")
 
-    if h1 is None:
+    if heading is None:
         return None
 
-    title = h1.get_text(" ", strip=True)
+    title = heading.get_text(" ", strip=True)
 
     if not title:
         return None
 
-    dates = parse_date_range(page_text)
+    # URL de la fiche.
+    link = heading.find("a", href=True)
 
-    if not dates:
-        raise RuntimeError(
-            f"Dates introuvables pour l'exposition : {title}"
-        )
+    if link is None:
+        link = card.find("a", href=True)
+
+    if link is None:
+        return None
+
+    href = link["href"]
+
+    if href.startswith("/"):
+        href = "https://www.musee-orsay.fr" + href
+
+    # Dates.
+    dates = parse_date_range(text)
+
+    if dates is None:
+        return None
 
     start, end = dates
+
+    # Certaines cartes n'affichent que "Jusqu'au..."
+    # sur l'agenda. Dans ce cas, la fiche individuelle
+    # est nécessaire pour récupérer la date de début.
+    if start is None:
+        return None
 
     return {
         "title": title,
         "venue": VENUE,
         "start": start,
         "end": end,
-        "url": url,
+        "url": href,
     }
 
 
 def scrape():
-    links = get_exhibition_links()
+    soup = get_page()
+
+    section = get_exhibition_section(soup)
+
+    cards = get_exhibition_cards(section)
 
     exhibitions = []
 
-    for url in links:
-        try:
-            exhibition = scrape_exhibition(url)
+    for card in cards:
+        exhibition = scrape_card(card)
 
-            if exhibition:
-                exhibitions.append(exhibition)
-
-        except requests.RequestException as error:
-            print(
-                f"Erreur réseau pour {url}: {error}"
-            )
+        if exhibition:
+            exhibitions.append(exhibition)
 
     if not exhibitions:
         raise RuntimeError(
@@ -237,7 +246,6 @@ def scrape():
             "Les données existantes ne seront pas remplacées."
         )
 
-    # Suppression des doublons.
     unique = {}
 
     for exhibition in exhibitions:
@@ -268,7 +276,6 @@ def main():
         with output.open("r", encoding="utf-8") as f:
             existing = json.load(f)
 
-    # On ne remplace que les données du Musée d'Orsay.
     other_venues = [
         exhibition
         for exhibition in existing
