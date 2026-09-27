@@ -112,6 +112,13 @@
     "url": "https://www.louvre.fr/expositions-et-evenements/expositions/l-eau-primordiale-0"
   },
   {
+    "title": "Affinités",
+    "venue": "Musée du Louvre",
+    "start": "2026-06-24",
+    "end": "2026-12-31",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/affinites-0"
+  },
+  {
     "title": "La donation Michel Lacoste au musée du Louvre",
     "venue": "Musée du Louvre",
     "start": "2026-06-26",
@@ -119,24 +126,10 @@
     "url": "https://www.louvre.fr/expositions-et-evenements/expositions/la-donation-michel-lacoste-au-musee-du-louvre"
   },
   {
-    "title": "L'art romain du Louvre",
+    "title": "Les Hôtes du Louvre",
     "venue": "Musée du Louvre",
-    "start": "2026-06-11",
-    "end": "2027-04-18",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/l-art-romain-du-louvre"
-  },
-  {
-    "title": "Crosscurrents",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-19",
-    "end": "2027-01-24",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/crosscurrents"
-  },
-  {
-    "title": "From the Louvre: Masterpieces of Islamic Art",
-    "venue": "Musée du Louvre",
-    "start": "2026-09-26",
-    "end": "2027-01-18",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/from-the-louvre-masterpieces-of-islamic-art"
+    "start": "2026-09-24",
+    "end": "2026-12-14",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/les-hotes-du-louvre"
   }
 ]
