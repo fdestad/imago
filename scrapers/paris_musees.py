@@ -7,26 +7,11 @@ import requests
 
 
 INDEX_URL = "https://parismusees.paris.fr/fr/expositions"
-VENUE_SOURCE = "Paris Musées"
-
-MONTHS = {
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 9,
-    10: 10,
-    11: 11,
-    12: 12,
-}
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
 }
+
 
 VENUE_ALIASES = {
     "Maison de Balzac": "Maison de Balzac",
@@ -52,7 +37,8 @@ VENUE_ALIASES = {
     "Petit Palais, musée des Beaux-arts de la Ville de Paris": "Petit Palais",
     "Petit Palais": "Petit Palais",
     "Catacombes de Paris": "Catacombes de Paris",
-    "Crypte archéologique de l'île de la Cité": "Crypte archéologique de l'île de la Cité",
+    "Crypte archéologique de l'île de la Cité":
+        "Crypte archéologique de l'île de la Cité",
 }
 
 
@@ -116,86 +102,98 @@ def find_venue(text):
     return matches[0][2]
 
 
-def find_exhibition_cards(markdown):
-    date_pattern = re.compile(
+def find_date_markers(markdown):
+    pattern = re.compile(
         r"\[\d{1,2}\s+\d{2}/\d{2}\s*>\s*"
         r"\d{1,2}\s+\d{2}/\d{2}\s+Exposition\s+"
     )
 
-    starts = [match.start() for match in date_pattern.finditer(markdown)]
-
-    cards = []
-
-    for index, start in enumerate(starts):
-        if index + 1 < len(starts):
-            end = starts[index + 1]
-        else:
-            end = len(markdown)
-
-        card = markdown[start:end]
-        cards.append(card)
-
-    return cards
+    return list(pattern.finditer(markdown))
 
 
-def extract_exhibition(card):
-    dates = parse_dates(card)
-
-    if dates is None:
-        return None
-
-    start, end = dates
-
-    venue = find_venue(card)
-
-    if venue is None:
-        print("Musée introuvable dans la carte :")
-        print(card[:500])
-        return None
-
+def find_exhibition_links(markdown):
     pattern = re.compile(
-        r"https://parismusees\.paris\.fr"
+        r"\(?(https://parismusees\.paris\.fr"
         r"/fr/exposition/"
-        r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+"
+        r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+)"
+        r"\)?"
         r"\s+"
         r'"(?P<title>[^"]+)"'
     )
 
-    matches = list(pattern.finditer(card))
+    return list(pattern.finditer(markdown))
 
-    if not matches:
-        print("Lien d'exposition introuvable dans la carte :")
-        print(card[:500])
-        return None
 
-    match = matches[-1]
+def extract_exhibitions(markdown):
+    date_markers = find_date_markers(markdown)
+    links = find_exhibition_links(markdown)
 
-    url = match.group(0).split('"')[0]
-    title = match.group("title").strip()
+    exhibitions = []
 
-    return {
-        "title": title,
-        "venue": venue,
-        "start": start,
-        "end": end,
-        "url": url,
-    }
+    for link in links:
+        link_position = link.start()
+
+        previous_markers = [
+            marker for marker in date_markers
+            if marker.start() <= link_position
+        ]
+
+        if not previous_markers:
+            continue
+
+        marker = previous_markers[-1]
+
+        next_markers = [
+            item for item in date_markers
+            if item.start() > marker.start()
+        ]
+
+        if next_markers:
+            card_end = next_markers[0].start()
+        else:
+            card_end = len(markdown)
+
+        card = markdown[marker.start():card_end]
+
+        dates = parse_dates(card)
+
+        if dates is None:
+            continue
+
+        start, end = dates
+
+        venue = find_venue(card)
+
+        if venue is None:
+            print("Musée introuvable pour :")
+            print(card[:500])
+            continue
+
+        title = link.group("title").strip()
+        url = link.group(1).strip()
+
+        if not title:
+            continue
+
+        exhibitions.append({
+            "title": title,
+            "venue": venue,
+            "start": start,
+            "end": end,
+            "url": url,
+        })
+
+    return exhibitions
 
 
 def scrape():
     markdown = get_page(INDEX_URL)
 
-    cards = find_exhibition_cards(markdown)
+    exhibitions = extract_exhibitions(markdown)
 
-    print(f"{len(cards)} carte(s) d'exposition trouvée(s).")
-
-    exhibitions = []
-
-    for card in cards:
-        exhibition = extract_exhibition(card)
-
-        if exhibition:
-            exhibitions.append(exhibition)
+    print(
+        f"{len(exhibitions)} exposition(s) Paris Musées détectée(s)."
+    )
 
     if not exhibitions:
         raise RuntimeError(
@@ -216,6 +214,14 @@ def scrape():
 
     exhibitions = list(unique.values())
 
+    exhibitions.sort(
+        key=lambda exhibition: (
+            exhibition["start"],
+            exhibition["venue"],
+            exhibition["title"],
+        )
+    )
+
     print("Expositions Paris Musées détectées :")
 
     for exhibition in exhibitions:
@@ -223,7 +229,8 @@ def scrape():
             f"- {exhibition['title']} | "
             f"{exhibition['venue']} | "
             f"{exhibition['start']} → "
-            f"{exhibition['end']}"
+            f"{exhibition['end']} | "
+            f"{exhibition['url']}"
         )
 
     return exhibitions
