@@ -27,6 +27,9 @@ jobs:
       - name: Run Louvre scraper
         run: python scrapers/louvre.py
 
+      - name: Run Jeu de Paume scraper
+        run: python scrapers/jeu_de_paume.py
+
       - name: Save updated data
         run: |
           git config user.name "Imago Bot"
