@@ -30,17 +30,23 @@ MONTHS = {
 
 PARIS_MUSEES = {
     "Maison de Balzac",
+    "Maison de Victor Hugo - Hauteville House",
     "Maison de Victor Hugo",
     "Musée Bourdelle",
+    "Musée Carnavalet – Histoire de Paris",
     "Musée Carnavalet",
+    "Musée Cernuschi, musée des Arts de l’Asie de la Ville de Paris",
     "Musée Cernuschi",
+    "Musée Cognacq-Jay, le goût du XVIIIe",
     "Musée Cognacq-Jay",
-    "Musée de la Libération de Paris",
+    "Musée de la Libération de Paris - musée du Général Leclerc - musée Jean Moulin",
     "Musée de la Vie romantique",
     "Musée d’Art Moderne de Paris",
     "Musée d'Art Moderne de Paris",
     "Musée Zadkine",
+    "Palais Galliera, musée de la Mode de la Ville de Paris",
     "Palais Galliera",
+    "Petit Palais, musée des Beaux-arts de la Ville de Paris",
     "Petit Palais",
     "Catacombes de Paris",
     "Crypte archéologique de l'île de la Cité",
@@ -129,16 +135,16 @@ def get_exhibition_links():
 
     links = []
 
-    # On récupère tous les liens Markdown vers parismusees.paris.fr
-    pattern = r"\]\((https?://parismusees\.paris\.fr/[^)\s]+)\)"
+    # Fiches individuelles Paris Musées :
+    # /fr/exposition/...  (singulier)
+    pattern = (
+        r"\]\((https?://parismusees\.paris\.fr"
+        r"/fr/exposition/"
+        r"[^)\s]+)\)"
+    )
 
     for match in re.finditer(pattern, markdown):
         url = match.group(1)
-
-        # On ne garde que les pages qui ressemblent à des fiches
-        # d'exposition.
-        if "/fr/expositions/" not in url:
-            continue
 
         if url not in links:
             links.append(url)
@@ -150,24 +156,11 @@ def get_exhibition_links():
             print(f"  {url}")
 
     if not links:
-        # Diagnostic supplémentaire : montrer les URLs Paris Musées
-        # présentes dans la réponse.
-        all_urls = re.findall(
-            r"https?://parismusees\.paris\.fr/[^\s)\]>]+",
-            markdown,
-        )
-
-        print("URLs Paris Musées détectées dans la page :")
-
-        for url in all_urls[:30]:
-            print(f"  {url}")
-
         raise RuntimeError(
             "Aucune fiche d'exposition trouvée sur Paris Musées."
         )
 
     return links
-
 
 def extract_title(markdown):
     for line in markdown.splitlines():
