@@ -33,6 +33,9 @@ jobs:
       - name: Run Musée d'Orsay scraper
         run: python scrapers/orsay.py
 
+      - name: Run Paris Musées scraper
+        run: python scrapers/paris_musees.py
+
       - name: Save updated data
         run: |
           git config user.name "Imago Bot"
