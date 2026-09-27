@@ -1,10 +1,10 @@
 [
   {
     "title": "Robert Capa, photographe de guerre",
-    "venue": "Musée de la Libération de Paris",
+    "venue": "Musée de la Libération de Paris - musée du Général Leclerc - musée Jean Moulin",
     "start": "2026-02-18",
     "end": "2026-12-20",
-    "url": "https://parismusees.paris.fr/fr/expositions"
+    "url": "https://parismusees.paris.fr/fr/exposition/robert-capa-photographe-de-guerre"
   },
   {
     "title": "Zurbarán",
@@ -68,13 +68,6 @@
     "start": "2026-09-15",
     "end": "2027-01-31",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/une-statue-pour-la-liberte-experience-immersive-en-realite-virtuelle"
-  },
-  {
-    "title": "Auguste Bartholdi",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-15",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/auguste-bartholdi-la-liberte-eclairant-le-monde"
   },
   {
     "title": "Marie et Félix Bracquemond",
@@ -154,38 +147,52 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vuillard-theatres-intimes"
   },
   {
-    "title": "Tisser, broder, sublimer Les savoir-faire de la mode",
+    "title": "Tisser, broder, sublimer",
     "venue": "Palais Galliera",
     "start": "2025-12-13",
     "end": "2026-10-18",
-    "url": "https://parismusees.paris.fr/fr/exposition/tisser-broder-sublimer"
+    "url": "https://parismusees.paris.fr/fr/exposition/tisser-broder-sublimer "
   },
   {
-    "title": "Hugo et l’architecture De la pierre à la plume",
+    "title": "Hugo et l’architecture",
     "venue": "Maison de Victor Hugo",
     "start": "2026-06-11",
     "end": "2026-11-22",
-    "url": "https://parismusees.paris.fr/fr/exposition/hugo-et-l-architecture"
+    "url": "https://parismusees.paris.fr/fr/exposition/hugo-et-l-architecture "
   },
   {
     "title": "Robert Capa, photographe de guerre",
-    "venue": "Musée de la Libération de Paris - musée du Général Leclerc - musée Jean Moulin",
+    "venue": "Musée de la Libération de Paris",
     "start": "2026-02-18",
     "end": "2026-12-20",
-    "url": "https://parismusees.paris.fr/fr/exposition/robert-capa-photographe-de-guerre"
+    "url": "https://parismusees.paris.fr/fr/exposition/robert-capa-photographe-de-guerre "
   },
   {
-    "title": "Eva Gonzalès (1847-1883) Parcours d’une artiste libre",
+    "title": "Eva Gonzalès (1847-1883)",
     "venue": "Petit Palais",
     "start": "2026-09-15",
     "end": "2027-01-24",
-    "url": "https://parismusees.paris.fr/fr/exposition/eva-gonzales-1847-1883"
+    "url": "https://parismusees.paris.fr/fr/exposition/eva-gonzales-1847-1883 "
   },
   {
     "title": "L’étoffe de l’artiste",
     "venue": "Musée Bourdelle",
     "start": "2026-09-23",
     "end": "2027-01-24",
-    "url": "https://parismusees.paris.fr/fr/exposition/l-etoffe-de-l-artiste"
+    "url": "https://parismusees.paris.fr/fr/exposition/l-etoffe-de-l-artiste "
+  },
+  {
+    "title": "Kerry James Marshall",
+    "venue": "Musée d’Art Moderne de Paris",
+    "start": "2026-09-18",
+    "end": "2027-01-24",
+    "url": "https://parismusees.paris.fr/fr/exposition/kerry-james-marshall "
+  },
+  {
+    "title": "Un vestiaire à soi",
+    "venue": "Musée d’Art Moderne de Paris",
+    "start": "2026-09-18",
+    "end": "2027-01-24",
+    "url": "https://parismusees.paris.fr/fr/exposition/un-vestiaire-a-soi "
   }
 ]
