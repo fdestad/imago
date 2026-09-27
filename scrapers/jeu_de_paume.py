@@ -1,14 +1,15 @@
 import json
 import re
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
 
-URL = "https://jeudepaume.org/agenda/"
+BASE_URL = "https://jeudepaume.org"
+URL = f"{BASE_URL}/agenda/"
 VENUE = "Jeu de Paume"
-
 
 MONTHS = {
     "janvier": 1,
@@ -44,12 +45,94 @@ def parse_date_range(text):
     day1, month1, year1, day2, month2, year2 = match.groups()
 
     try:
-        start = f"{year1}-{MONTHS[month1.lower()]:02d}-{int(day1):02d}"
-        end = f"{year2}-{MONTHS[month2.lower()]:02d}-{int(day2):02d}"
+        start = (
+            f"{year1}-"
+            f"{MONTHS[month1.lower()]:02d}-"
+            f"{int(day1):02d}"
+        )
+
+        end = (
+            f"{year2}-"
+            f"{MONTHS[month2.lower()]:02d}-"
+            f"{int(day2):02d}"
+        )
     except KeyError:
         return None
 
     return start, end
+
+
+def is_exhibition_page(soup):
+    """
+    Vérifie que la fiche correspond bien à une exposition
+    et non à une visite, conférence, projection, atelier, etc.
+    """
+
+    text = soup.get_text(" ", strip=True)
+
+    # Le Jeu de Paume utilise normalement cette terminologie
+    # sur les fiches d'exposition.
+    exhibition_markers = [
+        "Exposition",
+        "exposition",
+    ]
+
+    return any(marker in text for marker in exhibition_markers)
+
+
+def extract_exhibition(url):
+    response = requests.get(
+        url,
+        timeout=30,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
+        },
+    )
+
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    if not is_exhibition_page(soup):
+        return None
+
+    text = soup.get_text(" ", strip=True)
+
+    # On ne conserve que les expositions à Paris.
+    # Les fiches de Tours / en ligne sont ainsi exclues.
+    if not re.search(r"\bParis\b", text):
+        return None
+
+    dates = parse_date_range(text)
+
+    if not dates:
+        return None
+
+    start, end = dates
+
+    # Titre principal de la fiche.
+    title = None
+
+    for selector in ["h1", "h2"]:
+        heading = soup.select_one(selector)
+
+        if heading:
+            candidate = heading.get_text(" ", strip=True)
+
+            if candidate:
+                title = candidate
+                break
+
+    if not title:
+        return None
+
+    return {
+        "title": title,
+        "venue": VENUE,
+        "start": start,
+        "end": end,
+        "url": url,
+    }
 
 
 def scrape():
@@ -65,77 +148,57 @@ def scrape():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    exhibitions = []
-    seen = set()
+    candidate_urls = set()
 
+    # On collecte les liens vers les fiches de l'agenda.
     for link in soup.find_all("a", href=True):
 
         href = link["href"]
 
-        if "/agenda/" not in href:
+        full_url = urljoin(BASE_URL, href)
+
+        if not full_url.startswith(BASE_URL):
             continue
 
-        title = link.get_text(" ", strip=True)
-
-        if not title:
+        # On ignore les liens génériques.
+        if full_url.rstrip("/") == URL.rstrip("/"):
             continue
 
-        # On cherche le bloc contenant les informations
-        # de l'exposition.
-        container = link
+        candidate_urls.add(full_url)
 
-        for _ in range(4):
-            if container.parent is None:
-                break
+    exhibitions = []
 
-            container = container.parent
+    for url in sorted(candidate_urls):
 
-            text = container.get_text(
-                " ",
-                strip=True,
-            )
+        try:
+            exhibition = extract_exhibition(url)
 
-            if "Paris" in text and re.search(r"\d{4}", text):
-                break
-
-        text = container.get_text(" ", strip=True)
-
-        # Le Jeu de Paume indique le lieu dans le bloc.
-        # On ne conserve que Paris.
-        if "Paris" not in text:
+        except requests.RequestException:
             continue
 
-        dates = parse_date_range(text)
+        if exhibition:
+            exhibitions.append(exhibition)
 
-        if not dates:
-            continue
+    # Suppression des doublons.
+    unique = {}
 
-        start, end = dates
+    for exhibition in exhibitions:
+        key = (
+            exhibition["title"],
+            exhibition["start"],
+            exhibition["end"],
+        )
 
-        if href.startswith("/"):
-            full_url = "https://jeudepaume.org" + href
-        else:
-            full_url = href
+        unique[key] = exhibition
 
-        key = (title, start, end)
+    exhibitions = list(unique.values())
 
-        if key in seen:
-            continue
-
-        seen.add(key)
-
-        exhibitions.append({
-            "title": title,
-            "venue": VENUE,
-            "start": start,
-            "end": end,
-            "url": full_url,
-        })
-
+    # Protection contre un scraping vide.
     if not exhibitions:
         raise RuntimeError(
             "Aucune exposition du Jeu de Paume à Paris "
-            "n'a été détectée."
+            "n'a été détectée. Les données existantes "
+            "ne seront pas remplacées."
         )
 
     return exhibitions
@@ -169,7 +232,8 @@ def main():
         )
 
     print(
-        f"Jeu de Paume : {len(exhibitions)} expositions récupérées."
+        f"Jeu de Paume : "
+        f"{len(exhibitions)} expositions récupérées."
     )
 
 
