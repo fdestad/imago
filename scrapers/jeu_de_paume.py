@@ -1,14 +1,13 @@
 import json
 import re
+from datetime import datetime
 from pathlib import Path
-from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
 
-BASE_URL = "https://jeudepaume.org"
-URL = f"{BASE_URL}/agenda/"
+URL = "https://jeudepaume.org/agenda/"
 VENUE = "Jeu de Paume"
 
 MONTHS = {
@@ -31,108 +30,63 @@ def parse_date_range(text):
     text = text.replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
+    # Exemple :
+    # "Du 20 octobre 2026 au 10 janvier 2027"
     pattern = (
+        r"Du\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
-        r"\s*[–-]\s*"
+        r"\s+au\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
     )
 
     match = re.search(pattern, text, re.IGNORECASE)
 
-    if not match:
-        return None
+    if match:
+        day1, month1, year1, day2, month2, year2 = match.groups()
 
-    day1, month1, year1, day2, month2, year2 = match.groups()
-
-    try:
-        start = (
-            f"{year1}-"
-            f"{MONTHS[month1.lower()]:02d}-"
-            f"{int(day1):02d}"
+        start = datetime(
+            int(year1),
+            MONTHS[month1.lower()],
+            int(day1),
         )
 
-        end = (
-            f"{year2}-"
-            f"{MONTHS[month2.lower()]:02d}-"
-            f"{int(day2):02d}"
+        end = datetime(
+            int(year2),
+            MONTHS[month2.lower()],
+            int(day2),
         )
-    except KeyError:
-        return None
 
-    return start, end
+        return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
-
-def is_exhibition_page(soup):
-    """
-    Vérifie que la fiche correspond bien à une exposition
-    et non à une visite, conférence, projection, atelier, etc.
-    """
-
-    text = soup.get_text(" ", strip=True)
-
-    # Le Jeu de Paume utilise normalement cette terminologie
-    # sur les fiches d'exposition.
-    exhibition_markers = [
-        "Exposition",
-        "exposition",
-    ]
-
-    return any(marker in text for marker in exhibition_markers)
-
-
-def extract_exhibition(url):
-    response = requests.get(
-        url,
-        timeout=30,
-        headers={
-            "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
-        },
+    # Exemple :
+    # "Du 12 juin au 27 septembre 2026"
+    pattern = (
+        r"Du\s+"
+        r"(\d{1,2})\s+([a-zéû]+)"
+        r"\s+au\s+"
+        r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
     )
 
-    response.raise_for_status()
+    match = re.search(pattern, text, re.IGNORECASE)
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    if match:
+        day1, month1, day2, month2, year2 = match.groups()
 
-    if not is_exhibition_page(soup):
-        return None
+        start = datetime(
+            int(year2),
+            MONTHS[month1.lower()],
+            int(day1),
+        )
 
-    text = soup.get_text(" ", strip=True)
+        end = datetime(
+            int(year2),
+            MONTHS[month2.lower()],
+            int(day2),
+        )
 
-    # On ne conserve que les expositions à Paris.
-    # Les fiches de Tours / en ligne sont ainsi exclues.
-    if not re.search(r"\bParis\b", text):
-        return None
+        return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
-    dates = parse_date_range(text)
-
-    if not dates:
-        return None
-
-    start, end = dates
-
-    # Titre principal de la fiche.
-    title = None
-
-    for selector in ["h1", "h2"]:
-        heading = soup.select_one(selector)
-
-        if heading:
-            candidate = heading.get_text(" ", strip=True)
-
-            if candidate:
-                title = candidate
-                break
-
-    if not title:
-        return None
-
-    return {
-        "title": title,
-        "venue": VENUE,
-        "start": start,
-        "end": end,
-        "url": url,
-    }
+    return None
 
 
 def scrape():
@@ -148,36 +102,106 @@ def scrape():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    candidate_urls = set()
-
-    # On collecte les liens vers les fiches de l'agenda.
-    for link in soup.find_all("a", href=True):
-
-        href = link["href"]
-
-        full_url = urljoin(BASE_URL, href)
-
-        if not full_url.startswith(BASE_URL):
-            continue
-
-        # On ignore les liens génériques.
-        if full_url.rstrip("/") == URL.rstrip("/"):
-            continue
-
-        candidate_urls.add(full_url)
-
     exhibitions = []
 
-    for url in sorted(candidate_urls):
+    # L'agenda contient plusieurs types de contenus :
+    # expositions, conférences, performances, cinéma,
+    # visites, cours, etc.
+    #
+    # On ne collecte donc que les éléments explicitement
+    # présentés dans la section "Nos expositions du moment".
 
-        try:
-            exhibition = extract_exhibition(url)
+    section = None
 
-        except requests.RequestException:
+    for heading in soup.find_all(["h2", "h3"]):
+        title = heading.get_text(" ", strip=True)
+
+        if title == "Nos expositions du moment":
+            section = heading
+            break
+
+    if section is None:
+        raise RuntimeError(
+            "Section 'Nos expositions du moment' introuvable."
+        )
+
+    # On remonte au conteneur de la section.
+    container = section.parent
+
+    if container is None:
+        raise RuntimeError(
+            "Conteneur de la section des expositions introuvable."
+        )
+
+    # Les liens de la section permettent d'identifier les
+    # pages individuelles des expositions.
+    links = container.find_all("a", href=True)
+
+    seen_urls = set()
+
+    for link in links:
+        href = link["href"]
+
+        if href.startswith("/"):
+            href = "https://jeudepaume.org" + href
+
+        if not href.startswith("https://jeudepaume.org/"):
             continue
 
-        if exhibition:
-            exhibitions.append(exhibition)
+        if href in seen_urls:
+            continue
+
+        seen_urls.add(href)
+
+        # On récupère le texte du bloc contenant le lien.
+        parent = link
+
+        for _ in range(4):
+            if parent.parent is not None:
+                parent = parent.parent
+
+        text = parent.get_text(" ", strip=True)
+
+        # On ne garde que les expositions explicitement
+        # situées à Paris.
+        if "Jeu de Paume - Paris" not in text:
+            continue
+
+        dates = parse_date_range(text)
+
+        if not dates:
+            continue
+
+        start, end = dates
+
+        # Le titre du lien peut contenir "Exposition".
+        title = link.get_text(" ", strip=True)
+
+        if not title:
+            continue
+
+        title = re.sub(
+            r"^Exposition\s+",
+            "",
+            title,
+            flags=re.IGNORECASE,
+        ).strip()
+
+        exhibitions.append({
+            "title": title,
+            "venue": VENUE,
+            "start": start,
+            "end": end,
+            "url": href,
+        })
+
+    # Une absence totale est anormale :
+    # on empêche donc le scraper d'écraser les données
+    # existantes avec une liste vide.
+    if len(exhibitions) == 0:
+        raise RuntimeError(
+            "Aucune exposition parisienne détectée au Jeu de Paume."
+        )
 
     # Suppression des doublons.
     unique = {}
@@ -191,23 +215,18 @@ def scrape():
 
         unique[key] = exhibition
 
-    exhibitions = list(unique.values())
-
-    # Protection contre un scraping vide.
-    if not exhibitions:
-        raise RuntimeError(
-            "Aucune exposition du Jeu de Paume à Paris "
-            "n'a été détectée. Les données existantes "
-            "ne seront pas remplacées."
-        )
-
-    return exhibitions
+    return list(unique.values())
 
 
 def main():
     exhibitions = scrape()
 
     output = Path("data/exhibitions.json")
+
+    output.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     existing = []
 
@@ -233,7 +252,7 @@ def main():
 
     print(
         f"Jeu de Paume : "
-        f"{len(exhibitions)} expositions récupérées."
+        f"{len(exhibitions)} exposition(s) récupérée(s)."
     )
 
 
