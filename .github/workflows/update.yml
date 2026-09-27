@@ -1,0 +1,42 @@
+name: Update Imago data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 4 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Louvre scraper
+        run: python scrapers/louvre.py
+
+      - name: Save updated data
+        run: |
+          git config user.name "Imago Bot"
+          git config user.email "imago-bot@users.noreply.github.com"
+
+          git add data/exhibitions.json
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "Update exhibition data"
+            git push
+          fi
