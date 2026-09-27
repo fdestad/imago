@@ -178,30 +178,11 @@ def scrape_exhibition(url):
     if not main_title:
         return None
 
-    # Sous-titre éventuel.
-    # Pour Stan Douglas, par exemple :
-    # h1 = Stan Douglas
-    # h2 = Parallax
-    subtitle = None
-
-    for h2 in soup.find_all("h2"):
-        candidate = h2.get_text(" ", strip=True)
-
-        if candidate and candidate.lower() not in {
-            "infos pratiques",
-            "informations pratiques",
-            "programme de la semaine",
-            "expositions",
-            "activités",
-            "cinéma",
-        }:
-            subtitle = candidate
-            break
-
-    if subtitle:
-        title = f"{main_title} — {subtitle}"
-    else:
-        title = main_title
+    # Le titre principal de l'exposition est le H1.
+    # On ne tente pas de déduire un sous-titre à partir des H2 :
+    # la page contient aussi des H2 correspondant à des sections
+    # secondaires du site.
+    title = main_title
 
     dates = parse_date_range(page_text)
 
