@@ -4,15 +4,17 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
 
 
-ORSAY_URL = (
-    "https://www.musee-orsay.fr/fr/programme/agenda"
-    "?types%5Bexhibition_event%5D=exhibition_event"
+SOURCE_URL = (
+    "https://www.musee-orsay.fr/"
+    "fr/programme/agenda/expositions"
 )
 
-PROXY_URL = "https://r.jina.ai/http://www.musee-orsay.fr/fr/programme/agenda?types%5Bexhibition_event%5D=exhibition_event"
+READER_URL = (
+    "https://r.jina.ai/"
+    + SOURCE_URL
+)
 
 VENUE = "Musée d'Orsay"
 
@@ -40,12 +42,20 @@ EXCLUDED_CATEGORIES = {
     "Exposition hors les murs",
 }
 
+ALLOWED_CATEGORIES = {
+    "Exposition au musée",
+    "Exposition contemporaine",
+    "Accrochage",
+    "Parcours",
+    "Présentation exceptionnelle",
+}
+
 
 def parse_dates(text):
     text = text.replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
-    # Du 30 septembre 2026 au 24 janvier 2027
+    # Du 29 septembre 2026 au 10 janvier 2027
     pattern = (
         r"Du\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
@@ -60,6 +70,36 @@ def parse_dates(text):
 
         start = datetime(
             int(year1),
+            MONTHS[month1.lower()],
+            int(day1),
+        )
+
+        end = datetime(
+            int(year2),
+            MONTHS[month2.lower()],
+            int(day2),
+        )
+
+        return (
+            start.strftime("%Y-%m-%d"),
+            end.strftime("%Y-%m-%d"),
+        )
+
+    # Du 30 septembre au 24 janvier 2027
+    pattern = (
+        r"Du\s+"
+        r"(\d{1,2})\s+([a-zéû]+)"
+        r"\s+au\s+"
+        r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
+    )
+
+    match = re.search(pattern, text, re.IGNORECASE)
+
+    if match:
+        day1, month1, day2, month2, year2 = match.groups()
+
+        start = datetime(
+            int(year2),
             MONTHS[month1.lower()],
             int(day1),
         )
@@ -102,118 +142,154 @@ def parse_dates(text):
 
 def get_page():
     response = requests.get(
-        PROXY_URL,
+        READER_URL,
         timeout=60,
         headers=HEADERS,
     )
 
     response.raise_for_status()
 
+    if not response.text.strip():
+        raise RuntimeError(
+            "La réponse de Jina Reader est vide."
+        )
+
     return response.text
 
 
-def scrape():
-    html = get_page()
+def extract_blocks(markdown):
+    """
+    Transforme le Markdown en blocs correspondant
+    aux expositions d'Orsay.
 
-    soup = BeautifulSoup(html, "html.parser")
+    On travaille entre les sections :
+      ## Expositions en cours
+      ## Expositions à venir
+    """
 
-    # On cherche explicitement la section "Expositions".
-    heading = None
+    lines = markdown.splitlines()
 
-    for element in soup.find_all(["h2", "h3"]):
-        if element.get_text(" ", strip=True) == "Expositions":
-            heading = element
+    blocks = []
+
+    current = []
+
+    inside_exhibitions = False
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Entrée dans une section d'expositions.
+        if stripped.startswith("## Expositions"):
+            inside_exhibitions = True
+
+            if current:
+                blocks.append(current)
+                current = []
+
+            continue
+
+        # Sortie lorsque commence une autre section de niveau 2.
+        if (
+            inside_exhibitions
+            and stripped.startswith("## ")
+            and not stripped.startswith("## Expositions")
+        ):
+            if current:
+                blocks.append(current)
+
+            current = []
+            inside_exhibitions = False
+            continue
+
+        if not inside_exhibitions:
+            continue
+
+        # Chaque titre ### démarre une nouvelle fiche.
+        if stripped.startswith("### "):
+            if current:
+                blocks.append(current)
+
+            current = [stripped]
+        elif current:
+            current.append(stripped)
+
+    if current:
+        blocks.append(current)
+
+    return blocks
+
+
+def clean_title(line):
+    title = re.sub(r"^###\s*", "", line).strip()
+
+    # Nettoyage de quelques artefacts Markdown.
+    title = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
+
+    return title.strip()
+
+
+def parse_block(block):
+    if not block:
+        return None
+
+    title_line = None
+
+    for line in block:
+        if line.startswith("### "):
+            title_line = line
             break
 
-    if heading is None:
-        raise RuntimeError(
-            "Section 'Expositions' introuvable dans la page Orsay."
-        )
+    if title_line is None:
+        return None
+
+    title = clean_title(title_line)
+
+    if not title:
+        return None
+
+    text = " ".join(block)
+
+    category = None
+
+    for candidate in ALLOWED_CATEGORIES | EXCLUDED_CATEGORIES:
+        if candidate in text:
+            category = candidate
+            break
+
+    if category is None:
+        return None
+
+    if category in EXCLUDED_CATEGORIES:
+        return None
+
+    dates = parse_dates(text)
+
+    if dates is None:
+        return None
+
+    start, end = dates
+
+    return {
+        "title": title,
+        "venue": VENUE,
+        "start": start,
+        "end": end,
+        "url": SOURCE_URL,
+    }
+
+
+def scrape():
+    markdown = get_page()
+
+    blocks = extract_blocks(markdown)
 
     exhibitions = []
 
-    # Parcours des éléments suivant le titre "Expositions".
-    for element in heading.find_all_next():
+    for block in blocks:
+        exhibition = parse_block(block)
 
-        # Une nouvelle section principale signifie que
-        # nous avons quitté la section Expositions.
-        if (
-            element.name == "h2"
-            and element is not heading
-        ):
-            break
-
-        if element.name != "article":
-            continue
-
-        text = element.get_text(" ", strip=True)
-
-        if not text:
-            continue
-
-        # Catégorie Orsay.
-        category = None
-
-        for candidate in [
-            "Exposition au musée",
-            "Exposition contemporaine",
-            "Accrochage",
-            "Parcours",
-            "Présentation exceptionnelle",
-            "Expérience immersive",
-            "Exposition hors les murs",
-        ]:
-            if candidate in text:
-                category = candidate
-                break
-
-        if category is None:
-            continue
-
-        # Règles Imago.
-        if category in EXCLUDED_CATEGORIES:
-            continue
-
-        # Titre.
-        title_element = element.find("h3")
-
-        if title_element is None:
-            continue
-
-        title = title_element.get_text(" ", strip=True)
-
-        if not title:
-            continue
-
-        # Lien.
-        link = title_element.find("a", href=True)
-
-        if link is None:
-            link = element.find("a", href=True)
-
-        if link is None:
-            continue
-
-        url = link["href"]
-
-        if url.startswith("/"):
-            url = "https://www.musee-orsay.fr" + url
-
-        # Dates.
-        dates = parse_dates(text)
-
-        if dates is None:
-            continue
-
-        start, end = dates
-
-        exhibitions.append({
-            "title": title,
-            "venue": VENUE,
-            "start": start,
-            "end": end,
-            "url": url,
-        })
+        if exhibition:
+            exhibitions.append(exhibition)
 
     if not exhibitions:
         raise RuntimeError(
@@ -221,7 +297,6 @@ def scrape():
             "Les données existantes ne seront pas remplacées."
         )
 
-    # Suppression des doublons.
     unique = {}
 
     for exhibition in exhibitions:
@@ -233,7 +308,20 @@ def scrape():
 
         unique[key] = exhibition
 
-    return list(unique.values())
+    exhibitions = list(unique.values())
+
+    print(
+        "Expositions Orsay détectées :"
+    )
+
+    for exhibition in exhibitions:
+        print(
+            f"- {exhibition['title']} | "
+            f"{exhibition['start']} → "
+            f"{exhibition['end']}"
+        )
+
+    return exhibitions
 
 
 def main():
