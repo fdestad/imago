@@ -135,25 +135,35 @@ def get_exhibition_links():
 
     links = []
 
-    # Fiches individuelles Paris Musées :
-    # /fr/exposition/...  (singulier)
-    pattern = (
+    # URL absolues
+    absolute_pattern = (
         r"\]\((https?://parismusees\.paris\.fr"
         r"/fr/exposition/"
         r"[^)\s]+)\)"
     )
 
-    for match in re.finditer(pattern, markdown):
+    for match in re.finditer(absolute_pattern, markdown):
         url = match.group(1)
+
+        if url not in links:
+            links.append(url)
+
+    # URL relatives
+    relative_pattern = (
+        r"\]\((/fr/exposition/"
+        r"[^)\s]+)\)"
+    )
+
+    for match in re.finditer(relative_pattern, markdown):
+        url = "https://parismusees.paris.fr" + match.group(1)
 
         if url not in links:
             links.append(url)
 
     print(f"{len(links)} lien(s) d'exposition détecté(s).")
 
-    if links:
-        for url in links[:20]:
-            print(f"  {url}")
+    for url in links[:20]:
+        print(f"  {url}")
 
     if not links:
         raise RuntimeError(
