@@ -1,12 +1,5 @@
 [
   {
-    "title": "Stan Douglas — Parallax",
-    "venue": "Jeu de Paume",
-    "start": "2026-10-20",
-    "end": "2027-01-10",
-    "url": "https://jeudepaume.org/agenda/"
-  },
-  {
     "title": "« Je passe ma vie à peindre »",
     "venue": "Musée d'Orsay",
     "start": "2026-09-30",
@@ -131,5 +124,33 @@
     "start": "2026-09-24",
     "end": "2026-12-14",
     "url": "https://www.louvre.fr/expositions-et-evenements/expositions/les-hotes-du-louvre"
+  },
+  {
+    "title": "Stan Douglas Parallax Du 20 octobre 2026 au 10 janvier 2027 Jeu de Paume - Paris",
+    "venue": "Jeu de Paume",
+    "start": "2026-10-20",
+    "end": "2027-01-10",
+    "url": "https://jeudepaume.org/evenement/stan-douglas/"
+  },
+  {
+    "title": "LAILA HIDA La nuit américaine Du 19 juin au 08 novembre 2026 Jeu de Paume - Tours",
+    "venue": "Jeu de Paume",
+    "start": "2026-10-20",
+    "end": "2027-01-10",
+    "url": "https://jeudepaume.org/evenement/laila-hida-la-nuit-americaine/"
+  },
+  {
+    "title": "Ed Alcock Secrets et mensonges Du 19 juin au 08 novembre 2026 Jeu de Paume - Tours",
+    "venue": "Jeu de Paume",
+    "start": "2026-10-20",
+    "end": "2027-01-10",
+    "url": "https://jeudepaume.org/evenement/ed-alcock/"
+  },
+  {
+    "title": "Polynesia 66, carnet de constellations de Véronique Caye Du 17 mars au 15 octobre 2026 Jeu de Paume – en ligne",
+    "venue": "Jeu de Paume",
+    "start": "2026-10-20",
+    "end": "2027-01-10",
+    "url": "https://jeudepaume.org/evenement/polynesia-66-carnet-de-constellations/"
   }
 ]
