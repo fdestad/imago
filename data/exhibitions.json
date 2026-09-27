@@ -1,82 +1,5 @@
 [
   {
-    "title": "L'Eau primordiale",
-    "venue": "Musée du Louvre",
-    "start": "2026-05-20",
-    "end": "2027-03-15",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Affinités",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-24",
-    "end": "2026-12-31",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "La donation Michel Lacoste au musée du Louvre",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-26",
-    "end": "2027-01-11",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Les Hôtes du Louvre",
-    "venue": "Musée du Louvre",
-    "start": "2026-09-24",
-    "end": "2026-12-14",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "L'art romain du Louvre",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-11",
-    "end": "2027-04-18",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Collectionner le 18ème siècle",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-12",
-    "end": "2026-10-11",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Crosscurrents",
-    "venue": "Musée du Louvre",
-    "start": "2026-06-19",
-    "end": "2027-01-24",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Ingres et la mode",
-    "venue": "Musée du Louvre",
-    "start": "2026-07-03",
-    "end": "2026-11-08",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Mythologies",
-    "venue": "Musée du Louvre",
-    "start": "2026-07-08",
-    "end": "2026-11-09",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "Chefs-d’œuvre de la Renaissance du musée du Louvre",
-    "venue": "Musée du Louvre",
-    "start": "2026-09-09",
-    "end": "2026-12-13",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
-    "title": "From the Louvre: Masterpieces of Islamic Art",
-    "venue": "Musée du Louvre",
-    "start": "2026-09-26",
-    "end": "2027-01-18",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions"
-  },
-  {
     "title": "Stan Douglas — Parallax",
     "venue": "Jeu de Paume",
     "start": "2026-10-20",
@@ -159,5 +82,61 @@
     "start": "2026-09-18",
     "end": "2027-01-24",
     "url": "https://parismusees.paris.fr/fr/expositions"
+  },
+  {
+    "title": "Zurbarán",
+    "venue": "Musée du Louvre",
+    "start": "2026-10-07",
+    "end": "2027-01-25",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/zurbaran"
+  },
+  {
+    "title": "Sculpter la couleur",
+    "venue": "Musée du Louvre",
+    "start": "2026-10-07",
+    "end": "2027-01-25",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/sculpter-la-couleur"
+  },
+  {
+    "title": "Louvre Photo",
+    "venue": "Musée du Louvre",
+    "start": "2026-11-04",
+    "end": "2027-05-03",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/louvre-photo"
+  },
+  {
+    "title": "L'Eau primordiale",
+    "venue": "Musée du Louvre",
+    "start": "2026-05-20",
+    "end": "2027-03-15",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/l-eau-primordiale-0"
+  },
+  {
+    "title": "La donation Michel Lacoste au musée du Louvre",
+    "venue": "Musée du Louvre",
+    "start": "2026-06-26",
+    "end": "2027-01-11",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/la-donation-michel-lacoste-au-musee-du-louvre"
+  },
+  {
+    "title": "L'art romain du Louvre",
+    "venue": "Musée du Louvre",
+    "start": "2026-06-11",
+    "end": "2027-04-18",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/l-art-romain-du-louvre"
+  },
+  {
+    "title": "Crosscurrents",
+    "venue": "Musée du Louvre",
+    "start": "2026-06-19",
+    "end": "2027-01-24",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/crosscurrents"
+  },
+  {
+    "title": "From the Louvre: Masterpieces of Islamic Art",
+    "venue": "Musée du Louvre",
+    "start": "2026-09-26",
+    "end": "2027-01-18",
+    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/from-the-louvre-masterpieces-of-islamic-art"
   }
 ]
