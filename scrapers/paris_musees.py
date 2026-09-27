@@ -135,34 +135,27 @@ def get_exhibition_links():
 
     links = []
 
-    # URL absolues
-    absolute_pattern = (
-        r"\]\((https?://parismusees\.paris\.fr"
+    # Jina échappe la syntaxe Markdown de la page.
+    # On cherche donc directement les URL des fiches
+    # individuelles d'exposition.
+    pattern = (
+        r"https://parismusees\.paris\.fr"
         r"/fr/exposition/"
-        r"[^)\s]+)\)"
+        r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+"
     )
 
-    for match in re.finditer(absolute_pattern, markdown):
-        url = match.group(1)
+    for match in re.finditer(pattern, markdown):
+        url = match.group(0)
 
-        if url not in links:
-            links.append(url)
-
-    # URL relatives
-    relative_pattern = (
-        r"\]\((/fr/exposition/"
-        r"[^)\s]+)\)"
-    )
-
-    for match in re.finditer(relative_pattern, markdown):
-        url = "https://parismusees.paris.fr" + match.group(1)
+        # Nettoyage éventuel des caractères ajoutés par Markdown
+        url = url.rstrip("\\)\"'")
 
         if url not in links:
             links.append(url)
 
     print(f"{len(links)} lien(s) d'exposition détecté(s).")
 
-    for url in links[:20]:
+    for url in links:
         print(f"  {url}")
 
     if not links:
