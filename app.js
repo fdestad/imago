@@ -1,25 +1,30 @@
-const exhibitions = [
-    {
-        title: "Exposition test",
-        venue: "Musée du Louvre",
-        start: "2026-06-01",
-        end: "2026-12-15"
-    },
-    {
-        title: "Autre exposition",
-        venue: "Musée d'Orsay",
-        start: "2026-09-10",
-        end: "2027-01-20"
-    },
-    {
-        title: "Exposition à venir",
-        venue: "Jeu de Paume",
-        start: "2026-10-20",
-        end: "2027-01-15"
-    }
-];
+let exhibitions = [];
 
 const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+async function loadExhibitions() {
+    try {
+        const response = await fetch("data/exhibitions.json");
+
+        if (!response.ok) {
+            throw new Error("Impossible de charger les données");
+        }
+
+        exhibitions = await response.json();
+
+        renderExhibitions("current");
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("exhibitions").innerHTML = `
+            <p>
+                Impossible de charger les expositions pour le moment.
+            </p>
+        `;
+    }
+}
 
 function renderExhibitions(type) {
     const container = document.getElementById("exhibitions");
@@ -51,6 +56,13 @@ function renderExhibitions(type) {
         return dateA - dateB;
     });
 
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <p>Aucune exposition.</p>
+        `;
+        return;
+    }
+
     container.innerHTML = filtered.map(exhibition => `
         <article class="exhibition">
             <div class="exhibition-title">${exhibition.title}</div>
@@ -72,6 +84,7 @@ function formatDate(date) {
 
 document.querySelectorAll(".tab").forEach(button => {
     button.addEventListener("click", () => {
+
         document.querySelectorAll(".tab").forEach(tab => {
             tab.classList.remove("active");
         });
@@ -82,4 +95,4 @@ document.querySelectorAll(".tab").forEach(button => {
     });
 });
 
-renderExhibitions("current");
+loadExhibitions();
