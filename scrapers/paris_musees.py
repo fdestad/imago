@@ -164,44 +164,50 @@ def parse_date_range(text):
 
 
 def extract_exhibition_links(markdown):
-    pattern = (
+    """
+    Extrait les URLs et les titres principaux des fiches
+    directement depuis les liens de la page d'index.
+
+    Paris Musées fournit le titre principal comme attribut
+    de titre du lien, par exemple :
+
+    (.../tisser-broder-sublimer "Tisser, broder, sublimer")
+    """
+
+    pattern = re.compile(
         r"https://parismusees\.paris\.fr"
         r"/fr/exposition/"
         r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+"
+        r"\s+"
+        r'"(?P<title>[^"]+)"'
     )
 
     links = []
 
-    for match in re.finditer(pattern, markdown):
+    for match in pattern.finditer(markdown):
         url = match.group(0)
 
-        url = url.rstrip(
-            "\\)\"'"
+        # Récupérer uniquement l'URL, sans le titre.
+        url_match = re.match(
+            r"(https://parismusees\.paris\.fr"
+            r"/fr/exposition/"
+            r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+)",
+            url,
         )
 
-        if url not in links:
-            links.append(url)
+        if not url_match:
+            continue
+
+        clean_url = url_match.group(1)
+        title = match.group("title").strip()
+
+        item = (clean_url, title)
+
+        if item not in links:
+            links.append(item)
 
     return links
 
-
-def extract_title(markdown):
-    """
-    Le titre principal des fiches Paris Musées est le premier
-    titre Markdown de niveau 1.
-    Le sous-titre apparaît ensuite et n'est donc pas récupéré.
-    """
-
-    for line in markdown.splitlines():
-        line = line.strip()
-
-        if line.startswith("# "):
-            title = line[2:].strip()
-
-            if title:
-                return title
-
-    return None
 
 
 def extract_venue(markdown):
@@ -220,16 +226,8 @@ def extract_venue(markdown):
     return None
 
 
-def scrape_exhibition(url):
+def scrape_exhibition(url, title):
     markdown = get_page(url)
-
-    title = extract_title(markdown)
-
-    if not title:
-        print(
-            f"Titre introuvable : {url}"
-        )
-        return None
 
     venue = extract_venue(markdown)
 
@@ -274,12 +272,20 @@ def scrape():
 
     exhibitions = []
 
-    for url in links:
-        try:
-            exhibition = scrape_exhibition(url)
+for url, title in links:
+    try:
+        # Pour l'instant, cette fonction ouvre encore la fiche
+        # pour récupérer le musée et les dates.
+        # On pourra optimiser cela ensuite si nécessaire.
+        exhibition = scrape_exhibition(url, title)
 
-            if exhibition:
-                exhibitions.append(exhibition)
+        if exhibition:
+            exhibitions.append(exhibition)
+
+    except requests.RequestException as error:
+        raise RuntimeError(
+            f"Erreur réseau pour {url}: {error}"
+        ) from error
 
         except requests.RequestException as error:
             raise RuntimeError(
