@@ -7,7 +7,6 @@ import requests
 
 
 INDEX_URL = "https://parismusees.paris.fr/fr/expositions"
-BASE_URL = "https://parismusees.paris.fr"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
@@ -29,6 +28,25 @@ MONTHS = {
 }
 
 
+PARIS_MUSEES = {
+    "Maison de Balzac",
+    "Maison de Victor Hugo",
+    "Musée Bourdelle",
+    "Musée Carnavalet",
+    "Musée Cernuschi",
+    "Musée Cognacq-Jay",
+    "Musée de la Libération de Paris",
+    "Musée de la Vie romantique",
+    "Musée d’Art Moderne de Paris",
+    "Musée d'Art Moderne de Paris",
+    "Musée Zadkine",
+    "Palais Galliera",
+    "Petit Palais",
+    "Catacombes de Paris",
+    "Crypte archéologique de l'île de la Cité",
+}
+
+
 def reader_url(url):
     return "https://r.jina.ai/" + url
 
@@ -39,13 +57,10 @@ def get_page(url):
         timeout=60,
         headers=HEADERS,
     )
-
     response.raise_for_status()
 
     if not response.text.strip():
-        raise RuntimeError(
-            f"Réponse vide pour {url}"
-        )
+        raise RuntimeError(f"Réponse vide pour {url}")
 
     return response.text
 
@@ -86,7 +101,7 @@ def parse_date_range(text):
 
     # Jusqu'au 24 janvier 2027
     pattern = (
-        r"Jusqu'au\s+"
+        r"Jusqu['’]au\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
     )
 
@@ -114,22 +129,41 @@ def get_exhibition_links():
 
     links = []
 
-    pattern = (
-        r"\]\((https://parismusees\.paris\.fr"
-        r"/fr/expositions/"
-        r"[^)\s]+)\)"
-    )
+    # On récupère tous les liens Markdown vers parismusees.paris.fr
+    pattern = r"\]\((https?://parismusees\.paris\.fr/[^)\s]+)\)"
 
     for match in re.finditer(pattern, markdown):
         url = match.group(1)
 
+        # On ne garde que les pages qui ressemblent à des fiches
+        # d'exposition.
+        if "/fr/expositions/" not in url:
+            continue
+
         if url not in links:
             links.append(url)
 
+    print(f"{len(links)} lien(s) d'exposition détecté(s).")
+
+    if links:
+        for url in links[:20]:
+            print(f"  {url}")
+
     if not links:
+        # Diagnostic supplémentaire : montrer les URLs Paris Musées
+        # présentes dans la réponse.
+        all_urls = re.findall(
+            r"https?://parismusees\.paris\.fr/[^\s)\]>]+",
+            markdown,
+        )
+
+        print("URLs Paris Musées détectées dans la page :")
+
+        for url in all_urls[:30]:
+            print(f"  {url}")
+
         raise RuntimeError(
-            "Aucune fiche d'exposition trouvée "
-            "sur Paris Musées."
+            "Aucune fiche d'exposition trouvée sur Paris Musées."
         )
 
     return links
@@ -149,35 +183,10 @@ def extract_title(markdown):
 
 
 def extract_museum(markdown):
-    """
-    Cherche le musée dans les lignes de la fiche.
-
-    Paris Musées affiche normalement le nom du musée
-    à proximité du type et des dates.
-    """
-
-    known_museums = [
-        "Maison de Balzac",
-        "Maison de Victor Hugo",
-        "Musée Bourdelle",
-        "Musée Carnavalet",
-        "Musée Cernuschi",
-        "Musée Cognacq-Jay",
-        "Musée de la Libération de Paris",
-        "Musée de la Vie romantique",
-        "Musée d’Art Moderne de Paris",
-        "Musée d'Art Moderne de Paris",
-        "Musée Zadkine",
-        "Palais Galliera",
-        "Petit Palais",
-        "Catacombes de Paris",
-        "Crypte archéologique de l'île de la Cité",
-    ]
-
     for line in markdown.splitlines():
         clean = line.strip()
 
-        for museum in known_museums:
+        for museum in PARIS_MUSEES:
             if museum in clean:
                 return museum
 
@@ -187,28 +196,25 @@ def extract_museum(markdown):
 def scrape_exhibition(url):
     markdown = get_page(url)
 
-    # La page individuelle doit être une exposition.
+    # La fiche doit correspondre à une exposition.
     if not re.search(
         r"\bExposition\b",
         markdown,
         re.IGNORECASE,
     ):
+        print(f"Pas une exposition : {url}")
         return None
 
     title = extract_title(markdown)
 
     if not title:
-        print(
-            f"Titre introuvable : {url}"
-        )
+        print(f"Titre introuvable : {url}")
         return None
 
     museum = extract_museum(markdown)
 
     if not museum:
-        print(
-            f"Musée introuvable : {title}"
-        )
+        print(f"Musée introuvable : {title}")
         return None
 
     dates = parse_date_range(markdown)
@@ -270,7 +276,7 @@ def scrape():
 
     exhibitions = list(unique.values())
 
-    print("Expositions Paris Musées détectées :")
+    print("Expositions Paris Musées détectées:")
 
     for exhibition in exhibitions:
         print(
@@ -287,11 +293,7 @@ def main():
     exhibitions = scrape()
 
     output = Path("data/exhibitions.json")
-
-    output.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    output.parent.mkdir(parents=True, exist_ok=True)
 
     existing = []
 
@@ -299,17 +301,12 @@ def main():
         with output.open("r", encoding="utf-8") as f:
             existing = json.load(f)
 
+    # On supprime uniquement les musées explicitement couverts
+    # par Paris Musées, sans toucher aux autres sources.
     other_venues = [
         exhibition
         for exhibition in existing
-        if not (
-            exhibition.get("venue", "").startswith("Musée ")
-            or exhibition.get("venue", "").startswith("Maison ")
-            or exhibition.get("venue", "").startswith("Palais ")
-            or exhibition.get("venue", "").startswith("Petit Palais")
-            or exhibition.get("venue", "").startswith("Catacombes")
-            or exhibition.get("venue", "").startswith("Crypte")
-        )
+        if exhibition.get("venue") not in PARIS_MUSEES
     ]
 
     combined = other_venues + exhibitions
