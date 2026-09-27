@@ -7,49 +7,52 @@ import requests
 
 
 INDEX_URL = "https://parismusees.paris.fr/fr/expositions"
+VENUE_SOURCE = "Paris Musées"
+
+MONTHS = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+    10: 10,
+    11: 11,
+    12: 12,
+}
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
 }
 
-MONTHS = {
-    "janvier": 1,
-    "février": 2,
-    "mars": 3,
-    "avril": 4,
-    "mai": 5,
-    "juin": 6,
-    "juillet": 7,
-    "août": 8,
-    "septembre": 9,
-    "octobre": 10,
-    "novembre": 11,
-    "décembre": 12,
-}
-
-
-PARIS_MUSEES = {
-    "Maison de Balzac",
-    "Maison de Victor Hugo - Hauteville House",
-    "Maison de Victor Hugo",
-    "Musée Bourdelle",
-    "Musée Carnavalet – Histoire de Paris",
-    "Musée Carnavalet",
-    "Musée Cernuschi, musée des Arts de l’Asie de la Ville de Paris",
-    "Musée Cernuschi",
-    "Musée Cognacq-Jay, le goût du XVIIIe",
-    "Musée Cognacq-Jay",
-    "Musée de la Libération de Paris - musée du Général Leclerc - musée Jean Moulin",
-    "Musée de la Vie romantique",
-    "Musée d’Art Moderne de Paris",
-    "Musée d'Art Moderne de Paris",
-    "Musée Zadkine",
-    "Palais Galliera, musée de la Mode de la Ville de Paris",
-    "Palais Galliera",
-    "Petit Palais, musée des Beaux-arts de la Ville de Paris",
-    "Petit Palais",
-    "Catacombes de Paris",
-    "Crypte archéologique de l'île de la Cité",
+VENUE_ALIASES = {
+    "Maison de Balzac": "Maison de Balzac",
+    "Maison de Victor Hugo - Hauteville House": "Maison de Victor Hugo",
+    "Maison de Victor Hugo": "Maison de Victor Hugo",
+    "Musée Bourdelle": "Musée Bourdelle",
+    "Musée Carnavalet – Histoire de Paris": "Musée Carnavalet",
+    "Musée Carnavalet": "Musée Carnavalet",
+    "Musée Cernuschi, musée des Arts de l’Asie de la Ville de Paris": "Musée Cernuschi",
+    "Musée Cernuschi": "Musée Cernuschi",
+    "Musée Cognacq-Jay, le goût du XVIIIe": "Musée Cognacq-Jay",
+    "Musée Cognacq-Jay": "Musée Cognacq-Jay",
+    "Musée de la Libération de Paris - musée du Général Leclerc - musée Jean Moulin":
+        "Musée de la Libération de Paris",
+    "Musée de la Vie romantique": "Musée de la Vie romantique",
+    "Musée d’Art Moderne de Paris": "Musée d’Art Moderne de Paris",
+    "Musée d'Art Moderne de Paris": "Musée d’Art Moderne de Paris",
+    "Musée d’Art moderne": "Musée d’Art Moderne de Paris",
+    "Musée d'Art moderne": "Musée d’Art Moderne de Paris",
+    "Musée Zadkine": "Musée Zadkine",
+    "Palais Galliera, musée de la Mode de la Ville de Paris": "Palais Galliera",
+    "Palais Galliera": "Palais Galliera",
+    "Petit Palais, musée des Beaux-arts de la Ville de Paris": "Petit Palais",
+    "Petit Palais": "Petit Palais",
+    "Catacombes de Paris": "Catacombes de Paris",
+    "Crypte archéologique de l'île de la Cité": "Crypte archéologique de l'île de la Cité",
 }
 
 
@@ -59,120 +62,96 @@ def get_page(url):
         timeout=60,
         headers=HEADERS,
     )
-
     response.raise_for_status()
 
     if not response.text.strip():
-        raise RuntimeError(
-            f"Réponse vide pour {url}"
-        )
+        raise RuntimeError("Réponse vide de Jina Reader.")
 
     return response.text
 
 
-def parse_date_range(text):
-    text = text.replace("\xa0", " ")
-    text = re.sub(r"\s+", " ", text).strip()
-
-    # Format : 13 décembre 2025 > 18 octobre 2026
-    pattern = (
-        r"(\d{1,2})\s+"
-        r"(janvier|février|mars|avril|mai|juin|juillet|août|"
-        r"septembre|octobre|novembre|décembre)\s+"
-        r"(\d{4})\s*>\s*"
-        r"(\d{1,2})\s+"
-        r"(janvier|février|mars|avril|mai|juin|juillet|août|"
-        r"septembre|octobre|novembre|décembre)\s+"
-        r"(\d{4})"
-    )
-
-    match = re.search(
-        pattern,
-        text,
-        re.IGNORECASE,
-    )
-
-    if match:
-        (
-            day1,
-            month1,
-            year1,
-            day2,
-            month2,
-            year2,
-        ) = match.groups()
-
-        start = datetime(
-            int(year1),
-            MONTHS[month1.lower()],
-            int(day1),
-        )
-
-        end = datetime(
-            int(year2),
-            MONTHS[month2.lower()],
-            int(day2),
-        )
-
-        return (
-            start.strftime("%Y-%m-%d"),
-            end.strftime("%Y-%m-%d"),
-        )
-
-    # Format plus court éventuellement utilisé par le site :
-    # 13 12/25 > 18 10/26
-    pattern = (
-        r"(\d{1,2})\s+"
-        r"(\d{2})/(\d{2})\s*>\s*"
-        r"(\d{1,2})\s+"
-        r"(\d{2})/(\d{2})"
-    )
-
-    match = re.search(
-        pattern,
+def parse_dates(text):
+    pattern = re.search(
+        r"(?P<day1>\d{1,2})\s+"
+        r"(?P<month1>\d{2})/(?P<year1>\d{2})\s*>\s*"
+        r"(?P<day2>\d{1,2})\s+"
+        r"(?P<month2>\d{2})/(?P<year2>\d{2})",
         text,
     )
 
-    if match:
-        (
-            day1,
-            month1,
-            year1,
-            day2,
-            month2,
-            year2,
-        ) = match.groups()
+    if not pattern:
+        return None
 
-        start = datetime(
-            2000 + int(year1),
-            int(month1),
-            int(day1),
-        )
+    day1 = int(pattern.group("day1"))
+    month1 = int(pattern.group("month1"))
+    year1 = 2000 + int(pattern.group("year1"))
 
-        end = datetime(
-            2000 + int(year2),
-            int(month2),
-            int(day2),
-        )
+    day2 = int(pattern.group("day2"))
+    month2 = int(pattern.group("month2"))
+    year2 = 2000 + int(pattern.group("year2"))
 
-        return (
-            start.strftime("%Y-%m-%d"),
-            end.strftime("%Y-%m-%d"),
-        )
+    start = datetime(year1, month1, day1)
+    end = datetime(year2, month2, day2)
 
-    return None
+    return (
+        start.strftime("%Y-%m-%d"),
+        end.strftime("%Y-%m-%d"),
+    )
 
 
-def extract_exhibition_links(markdown):
-    """
-    Extrait les URLs et les titres principaux des fiches
-    directement depuis les liens de la page d'index.
+def find_venue(text):
+    matches = []
 
-    Paris Musées fournit le titre principal comme attribut
-    de titre du lien, par exemple :
+    for alias, canonical in VENUE_ALIASES.items():
+        position = text.find(alias)
 
-    (.../tisser-broder-sublimer "Tisser, broder, sublimer")
-    """
+        if position != -1:
+            matches.append((position, alias, canonical))
+
+    if not matches:
+        return None
+
+    matches.sort(key=lambda item: item[0])
+
+    return matches[0][2]
+
+
+def find_exhibition_cards(markdown):
+    date_pattern = re.compile(
+        r"\[\d{1,2}\s+\d{2}/\d{2}\s*>\s*"
+        r"\d{1,2}\s+\d{2}/\d{2}\s+Exposition\s+"
+    )
+
+    starts = [match.start() for match in date_pattern.finditer(markdown)]
+
+    cards = []
+
+    for index, start in enumerate(starts):
+        if index + 1 < len(starts):
+            end = starts[index + 1]
+        else:
+            end = len(markdown)
+
+        card = markdown[start:end]
+        cards.append(card)
+
+    return cards
+
+
+def extract_exhibition(card):
+    dates = parse_dates(card)
+
+    if dates is None:
+        return None
+
+    start, end = dates
+
+    venue = find_venue(card)
+
+    if venue is None:
+        print("Musée introuvable dans la carte :")
+        print(card[:500])
+        return None
 
     pattern = re.compile(
         r"https://parismusees\.paris\.fr"
@@ -182,70 +161,17 @@ def extract_exhibition_links(markdown):
         r'"(?P<title>[^"]+)"'
     )
 
-    links = []
+    matches = list(pattern.finditer(card))
 
-    for match in pattern.finditer(markdown):
-        url = match.group(0)
-
-        # Récupérer uniquement l'URL, sans le titre.
-        url_match = re.match(
-            r"(https://parismusees\.paris\.fr"
-            r"/fr/exposition/"
-            r"[A-Za-z0-9À-ÿ._~:/?#\[\]@!$&'()*+,;=%-]+)",
-            url,
-        )
-
-        if not url_match:
-            continue
-
-        clean_url = url_match.group(1)
-        title = match.group("title").strip()
-
-        item = (clean_url, title)
-
-        if item not in links:
-            links.append(item)
-
-    return links
-
-
-
-def extract_venue(markdown):
-    """
-    Identifie le musée à partir de la liste des musées Paris Musées.
-    """
-
-    for museum in sorted(
-        PARIS_MUSEES,
-        key=len,
-        reverse=True,
-    ):
-        if museum in markdown:
-            return museum
-
-    return None
-
-
-def scrape_exhibition(url, title):
-    markdown = get_page(url)
-
-    venue = extract_venue(markdown)
-
-    if not venue:
-        print(
-            f"Musée introuvable : {title}"
-        )
+    if not matches:
+        print("Lien d'exposition introuvable dans la carte :")
+        print(card[:500])
         return None
 
-    dates = parse_date_range(markdown)
+    match = matches[-1]
 
-    if not dates:
-        print(
-            f"Dates introuvables : {title}"
-        )
-        return None
-
-    start, end = dates
+    url = match.group(0).split('"')[0]
+    title = match.group("title").strip()
 
     return {
         "title": title,
@@ -257,44 +183,19 @@ def scrape_exhibition(url, title):
 
 
 def scrape():
-    index = get_page(INDEX_URL)
+    markdown = get_page(INDEX_URL)
 
-    links = extract_exhibition_links(index)
+    cards = find_exhibition_cards(markdown)
 
-    print(
-        f"{len(links)} lien(s) d'exposition détecté(s)."
-    )
-
-    if not links:
-        raise RuntimeError(
-            "Aucune fiche d'exposition trouvée sur Paris Musées."
-        )
+    print(f"{len(cards)} carte(s) d'exposition trouvée(s).")
 
     exhibitions = []
 
-for url, title in links:
-    try:
-        # Pour l'instant, cette fonction ouvre encore la fiche
-        # pour récupérer le musée et les dates.
-        # On pourra optimiser cela ensuite si nécessaire.
-        exhibition = scrape_exhibition(url, title)
+    for card in cards:
+        exhibition = extract_exhibition(card)
 
         if exhibition:
             exhibitions.append(exhibition)
-
-    except requests.RequestException as error:
-        raise RuntimeError(
-            f"Erreur réseau pour {url}: {error}"
-        ) from error
-
-        except requests.RequestException as error:
-            raise RuntimeError(
-                f"Erreur réseau pour {url}: {error}"
-            ) from error
-
-    print(
-        f"{len(exhibitions)} fiche(s) Paris Musées trouvée(s)."
-    )
 
     if not exhibitions:
         raise RuntimeError(
@@ -311,12 +212,9 @@ for url, title in links:
             exhibition["start"],
             exhibition["end"],
         )
-
         unique[key] = exhibition
 
-    exhibitions = list(
-        unique.values()
-    )
+    exhibitions = list(unique.values())
 
     print("Expositions Paris Musées détectées :")
 
@@ -334,47 +232,35 @@ for url, title in links:
 def main():
     exhibitions = scrape()
 
-    output = Path(
-        "data/exhibitions.json"
-    )
-
-    output.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    output = Path("data/exhibitions.json")
+    output.parent.mkdir(parents=True, exist_ok=True)
 
     existing = []
 
     if output.exists():
-        with output.open(
-            "r",
-            encoding="utf-8",
-        ) as f:
-            existing = json.load(f)
+        with output.open("r", encoding="utf-8") as file:
+            existing = json.load(file)
+
+    paris_musees_venues = set(VENUE_ALIASES.values())
 
     other_venues = [
         exhibition
         for exhibition in existing
-        if exhibition.get("venue")
-        not in PARIS_MUSEES
+        if exhibition.get("venue") not in paris_musees_venues
     ]
 
     combined = other_venues + exhibitions
 
-    with output.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
+    with output.open("w", encoding="utf-8") as file:
         json.dump(
             combined,
-            f,
+            file,
             ensure_ascii=False,
             indent=2,
         )
 
     print(
-        f"Paris Musées : "
-        f"{len(exhibitions)} exposition(s) récupérée(s)."
+        f"Paris Musées : {len(exhibitions)} exposition(s) récupérée(s)."
     )
 
 
