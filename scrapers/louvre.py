@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 URL = "https://www.louvre.fr/expositions-et-evenements/expositions"
 VENUE = "Musée du Louvre"
 
-
 MONTHS = {
     "janvier": 1,
     "février": 2,
@@ -28,12 +27,6 @@ MONTHS = {
 
 
 def parse_date_range(text):
-    """
-    Convertit par exemple :
-    '7 octobre 2026 – 25 janvier 2027'
-    en deux dates ISO.
-    """
-
     text = text.replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
@@ -46,21 +39,46 @@ def parse_date_range(text):
     match = re.search(pattern, text, re.IGNORECASE)
 
     if not match:
-        return None
+        # Cas où la première date ne comporte pas d'année
+        pattern = (
+            r"(\d{1,2})\s+([a-zéû]+)"
+            r"\s*[–-]\s*"
+            r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
+        )
 
-    day1, month1, year1, day2, month2, year2 = match.groups()
+        match = re.search(pattern, text, re.IGNORECASE)
 
-    start = datetime(
-        int(year1),
-        MONTHS[month1.lower()],
-        int(day1),
-    )
+        if not match:
+            return None
 
-    end = datetime(
-        int(year2),
-        MONTHS[month2.lower()],
-        int(day2),
-    )
+        day1, month1, day2, month2, year2 = match.groups()
+
+        start = datetime(
+            int(year2),
+            MONTHS[month1.lower()],
+            int(day1),
+        )
+
+        end = datetime(
+            int(year2),
+            MONTHS[month2.lower()],
+            int(day2),
+        )
+
+    else:
+        day1, month1, year1, day2, month2, year2 = match.groups()
+
+        start = datetime(
+            int(year1),
+            MONTHS[month1.lower()],
+            int(day1),
+        )
+
+        end = datetime(
+            int(year2),
+            MONTHS[month2.lower()],
+            int(day2),
+        )
 
     return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
@@ -70,7 +88,7 @@ def scrape():
         URL,
         timeout=30,
         headers={
-            "User-Agent": "Imago exhibition collector"
+            "User-Agent": "Mozilla/5.0 (compatible; Imago/1.0)"
         },
     )
 
@@ -80,43 +98,67 @@ def scrape():
 
     exhibitions = []
 
-    # On récupère les liens vers les pages d'expositions.
-    links = soup.find_all("a", href=True)
+    # On travaille à partir des titres de niveau 2 et 3.
+    # La structure actuelle du Louvre utilise :
+    #
+    # h2 = expositions à venir / sections
+    # h3 = expositions
+    #
+    # On arrête complètement la collecte à
+    # "Le Louvre ailleurs".
 
-    seen = set()
+    stop_collecting = False
 
-    for link in links:
-        href = link["href"]
+    for heading in soup.find_all(["h2", "h3"]):
 
-        if "/expositions-et-evenements/expositions/" not in href:
+        title = heading.get_text(" ", strip=True)
+
+        if title == "Le Louvre ailleurs":
+            stop_collecting = True
+            break
+
+        if stop_collecting:
+            break
+
+        # Les titres de sections ne sont pas des expositions.
+        if title in {
+            "Exposition d'actualité",
+            "Artistes invités",
+        }:
             continue
 
-        title = link.get_text(" ", strip=True)
-
-        if not title:
+        # On ne traite que les titres de niveau 2/3
+        # qui sont réellement suivis d'une carte.
+        if heading.name not in {"h2", "h3"}:
             continue
 
-        if href.startswith("/"):
-            full_url = "https://www.louvre.fr" + href
+        link = heading.find("a", href=True)
+
+        if link:
+            exhibition_title = link.get_text(" ", strip=True)
+            href = link["href"]
         else:
-            full_url = href
+            exhibition_title = title
+            href = None
 
-        if full_url in seen:
+        if not exhibition_title:
             continue
 
-        seen.add(full_url)
-
-        # Le bloc contenant le lien contient normalement
-        # également les dates de l'exposition.
-        container = link.parent
+        # Cherche le bloc parent contenant les informations
+        # de cette exposition.
+        container = heading.parent
 
         if container is None:
             continue
 
-        text = container.parent.get_text(
-            " ",
-            strip=True
-        )
+        text = container.get_text(" ", strip=True)
+
+        # Si le parent immédiat ne contient pas les dates,
+        # on remonte d'un niveau.
+        if not re.search(r"\d{4}", text):
+            if container.parent is not None:
+                container = container.parent
+                text = container.get_text(" ", strip=True)
 
         dates = parse_date_range(text)
 
@@ -125,21 +167,43 @@ def scrape():
 
         start, end = dates
 
+        if href:
+            if href.startswith("/"):
+                href = "https://www.louvre.fr" + href
+        else:
+            continue
+
         exhibitions.append({
-            "title": title,
+            "title": exhibition_title,
             "venue": VENUE,
             "start": start,
             "end": end,
-            "url": full_url,
+            "url": href,
         })
 
-    if not exhibitions:
+    # Protection essentielle :
+    # une récupération vide ou manifestement incomplète
+    # ne doit jamais écraser les données existantes.
+
+    if len(exhibitions) < 5:
         raise RuntimeError(
-            "Le scraper Louvre n'a trouvé aucune exposition. "
-            "Les données existantes ne doivent pas être remplacées."
+            f"Seulement {len(exhibitions)} expositions Louvre "
+            "détectées. Les données existantes ne seront pas remplacées."
         )
 
-    return exhibitions
+    # Suppression des doublons
+    unique = {}
+
+    for exhibition in exhibitions:
+        key = (
+            exhibition["title"],
+            exhibition["start"],
+            exhibition["end"],
+        )
+
+        unique[key] = exhibition
+
+    return list(unique.values())
 
 
 def main():
@@ -149,31 +213,30 @@ def main():
 
     output.parent.mkdir(
         parents=True,
-        exist_ok=True
+        exist_ok=True,
     )
 
-    # Pour cette première étape, on remplace uniquement
-    # les données du Louvre.
     existing = []
 
     if output.exists():
         with output.open("r", encoding="utf-8") as f:
             existing = json.load(f)
 
-    existing_without_louvre = [
+    # On ne remplace que les données du Louvre.
+    other_venues = [
         exhibition
         for exhibition in existing
         if exhibition.get("venue") != VENUE
     ]
 
-    combined = existing_without_louvre + exhibitions
+    combined = other_venues + exhibitions
 
     with output.open("w", encoding="utf-8") as f:
         json.dump(
             combined,
             f,
             ensure_ascii=False,
-            indent=2
+            indent=2,
         )
 
     print(
