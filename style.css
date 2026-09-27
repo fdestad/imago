@@ -1,0 +1,96 @@
+:root {
+    --background: #f5f3ef;
+    --text: #171717;
+    --secondary: #777;
+    --line: #d8d4ce;
+    --accent: #171717;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+header {
+    padding: 28px 20px 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1px;
+}
+
+header p {
+    margin: 5px 0 0;
+    color: var(--secondary);
+}
+
+nav {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    padding: 0 20px;
+}
+
+.tab {
+    border: 0;
+    background: none;
+    padding: 14px 0;
+    margin-right: 28px;
+    font-size: 15px;
+    color: var(--secondary);
+    cursor: pointer;
+}
+
+.tab.active {
+    color: var(--text);
+    border-bottom: 2px solid var(--accent);
+}
+
+main {
+    padding: 10px 20px 40px;
+}
+
+.exhibition {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.exhibition-title {
+    font-size: 20px;
+    line-height: 1.25;
+    margin-bottom: 7px;
+}
+
+.exhibition-venue {
+    font-size: 14px;
+    color: var(--secondary);
+    margin-bottom: 6px;
+}
+
+.exhibition-dates {
+    font-size: 14px;
+}
+
+@media (min-width: 700px) {
+    main {
+        max-width: 760px;
+        margin: auto;
+    }
+
+    header {
+        max-width: 760px;
+        margin: auto;
+    }
+
+    nav {
+        padding-left: max(20px, calc((100% - 760px) / 2));
+    }
+}
