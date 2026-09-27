@@ -33,6 +33,9 @@ jobs:
       - name: Run Musée d'Orsay scraper
         run: python scrapers/orsay.py
 
+      - name: Debug Paris Musées
+        run: python debug_paris_musees.py
+
       - name: Run Paris Musées scraper
         run: python scrapers/paris_musees.py
 
