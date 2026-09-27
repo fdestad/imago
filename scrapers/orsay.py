@@ -4,17 +4,11 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
+from bs4 import BeautifulSoup
 
 
-SOURCE_URL = (
-    "https://www.musee-orsay.fr/"
-    "fr/programme/agenda/expositions"
-)
-
-READER_URL = (
-    "https://r.jina.ai/"
-    + SOURCE_URL
-)
+INDEX_URL = "https://www.musee-orsay.fr/fr/programme/agenda/expositions"
+BASE_URL = "https://www.musee-orsay.fr"
 
 VENUE = "Musée d'Orsay"
 
@@ -38,24 +32,36 @@ HEADERS = {
 }
 
 EXCLUDED_CATEGORIES = {
-    "Expérience immersive",
     "Exposition hors les murs",
 }
 
-ALLOWED_CATEGORIES = {
-    "Exposition au musée",
-    "Exposition contemporaine",
-    "Accrochage",
-    "Parcours",
-    "Présentation exceptionnelle",
-}
+
+def reader_url(url):
+    return "https://r.jina.ai/" + url
 
 
-def parse_dates(text):
+def get_page(url):
+    response = requests.get(
+        reader_url(url),
+        timeout=60,
+        headers=HEADERS,
+    )
+
+    response.raise_for_status()
+
+    if not response.text.strip():
+        raise RuntimeError(
+            f"Réponse vide pour {url}"
+        )
+
+    return response.text
+
+
+def parse_date_range(text):
     text = text.replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
-    # Du 29 septembre 2026 au 10 janvier 2027
+    # Du 30 septembre 2026 au 24 janvier 2027
     pattern = (
         r"Du\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
@@ -115,7 +121,7 @@ def parse_dates(text):
             end.strftime("%Y-%m-%d"),
         )
 
-    # Jusqu'au 06 décembre 2026
+    # Jusqu'au 6 décembre 2026
     pattern = (
         r"Jusqu'au\s+"
         r"(\d{1,2})\s+([a-zéû]+)\s+(\d{4})"
@@ -140,132 +146,105 @@ def parse_dates(text):
     return None
 
 
-def get_page():
-    response = requests.get(
-        READER_URL,
-        timeout=60,
-        headers=HEADERS,
+def get_exhibition_links():
+    markdown = get_page(INDEX_URL)
+
+    links = []
+
+    # Jina conserve les liens Markdown :
+    # [Titre](https://www.musee-orsay.fr/...)
+    pattern = (
+        r"\]\((https://www\.musee-orsay\.fr"
+        r"/fr/programme/agenda/expositions/"
+        r"[^)\s]+)\)"
     )
 
-    response.raise_for_status()
+    for match in re.finditer(pattern, markdown):
+        url = match.group(1)
 
-    if not response.text.strip():
+        if url not in links:
+            links.append(url)
+
+    if not links:
         raise RuntimeError(
-            "La réponse de Jina Reader est vide."
+            "Aucune fiche d'exposition trouvée "
+            "sur la page Orsay."
         )
 
-    return response.text
+    return links
 
 
-def extract_blocks(markdown):
-    """
-    Transforme le Markdown en blocs correspondant
-    aux expositions d'Orsay.
+def find_category(text):
+    categories = [
+        "Exposition au musée",
+        "Exposition contemporaine",
+        "Accrochage",
+        "Parcours",
+        "Présentation exceptionnelle",
+        "Expérience immersive",
+        "Exposition hors les murs",
+    ]
 
-    On travaille entre les sections :
-      ## Expositions en cours
-      ## Expositions à venir
-    """
+    positions = []
 
-    lines = markdown.splitlines()
+    for category in categories:
+        position = text.find(category)
 
-    blocks = []
+        if position != -1:
+            positions.append((position, category))
 
-    current = []
-
-    inside_exhibitions = False
-
-    for line in lines:
-        stripped = line.strip()
-
-        # Entrée dans une section d'expositions.
-        if stripped.startswith("## Expositions"):
-            inside_exhibitions = True
-
-            if current:
-                blocks.append(current)
-                current = []
-
-            continue
-
-        # Sortie lorsque commence une autre section de niveau 2.
-        if (
-            inside_exhibitions
-            and stripped.startswith("## ")
-            and not stripped.startswith("## Expositions")
-        ):
-            if current:
-                blocks.append(current)
-
-            current = []
-            inside_exhibitions = False
-            continue
-
-        if not inside_exhibitions:
-            continue
-
-        # Chaque titre ### démarre une nouvelle fiche.
-        if stripped.startswith("### "):
-            if current:
-                blocks.append(current)
-
-            current = [stripped]
-        elif current:
-            current.append(stripped)
-
-    if current:
-        blocks.append(current)
-
-    return blocks
-
-
-def clean_title(line):
-    title = re.sub(r"^###\s*", "", line).strip()
-
-    # Nettoyage de quelques artefacts Markdown.
-    title = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
-
-    return title.strip()
-
-
-def parse_block(block):
-    if not block:
+    if not positions:
         return None
 
-    title_line = None
+    positions.sort(key=lambda item: item[0])
 
-    for line in block:
-        if line.startswith("### "):
-            title_line = line
-            break
+    return positions[0][1]
 
-    if title_line is None:
-        return None
 
-    title = clean_title(title_line)
+def extract_title(markdown):
+    for line in markdown.splitlines():
+        line = line.strip()
 
-    if not title:
-        return None
+        if line.startswith("# "):
+            title = line[2:].strip()
 
-    text = " ".join(block)
+            if title:
+                return title
 
-    category = None
+    return None
 
-    for candidate in ALLOWED_CATEGORIES | EXCLUDED_CATEGORIES:
-        if candidate in text:
-            category = candidate
-            break
+
+def scrape_exhibition(url):
+    markdown = get_page(url)
+
+    category = find_category(markdown)
 
     if category is None:
+        print(
+            f"Catégorie introuvable : {url}"
+        )
         return None
 
     if category in EXCLUDED_CATEGORIES:
+        print(
+            f"Exposition hors les murs ignorée : {url}"
+        )
         return None
 
-    dates = parse_dates(text)
+    title = extract_title(markdown)
+
+    if not title:
+        print(
+            f"Titre introuvable : {url}"
+        )
+        return None
+
+    dates = parse_date_range(markdown)
 
     if dates is None:
-        return None
+        raise RuntimeError(
+            f"Dates introuvables pour : {title}"
+        )
 
     start, end = dates
 
@@ -274,22 +253,30 @@ def parse_block(block):
         "venue": VENUE,
         "start": start,
         "end": end,
-        "url": SOURCE_URL,
+        "url": url,
     }
 
 
 def scrape():
-    markdown = get_page()
+    links = get_exhibition_links()
 
-    blocks = extract_blocks(markdown)
+    print(
+        f"{len(links)} fiche(s) Orsay trouvée(s)."
+    )
 
     exhibitions = []
 
-    for block in blocks:
-        exhibition = parse_block(block)
+    for url in links:
+        try:
+            exhibition = scrape_exhibition(url)
 
-        if exhibition:
-            exhibitions.append(exhibition)
+            if exhibition:
+                exhibitions.append(exhibition)
+
+        except requests.RequestException as error:
+            raise RuntimeError(
+                f"Erreur réseau pour {url}: {error}"
+            ) from error
 
     if not exhibitions:
         raise RuntimeError(
@@ -310,9 +297,7 @@ def scrape():
 
     exhibitions = list(unique.values())
 
-    print(
-        "Expositions Orsay détectées :"
-    )
+    print("Expositions Orsay détectées :")
 
     for exhibition in exhibitions:
         print(
