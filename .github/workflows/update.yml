@@ -30,6 +30,9 @@ jobs:
       - name: Run Jeu de Paume scraper
         run: python scrapers/jeu_de_paume.py
 
+      - name: Run Musée d'Orsay scraper
+        run: python scrapers/orsay.py
+
       - name: Save updated data
         run: |
           git config user.name "Imago Bot"
