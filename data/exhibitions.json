@@ -38,7 +38,7 @@
     "title": "Affinités",
     "venue": "Musée du Louvre",
     "start": "2026-06-24",
-    "end": "2026-12-31",
+    "end": "2026-12-06",
     "url": "https://www.louvre.fr/expositions-et-evenements/expositions/affinites-0"
   },
   {
@@ -63,6 +63,13 @@
     "url": "https://jeudepaume.org/evenement/stan-douglas/"
   },
   {
+    "title": "«Je passe ma vie à peindre»",
+    "venue": "Musée d'Orsay",
+    "start": "2026-09-30",
+    "end": "2027-01-24",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/je-passe-ma-vie-peindre"
+  },
+  {
     "title": "Une statue pour la liberté",
     "venue": "Musée d'Orsay",
     "start": "2026-09-15",
@@ -77,16 +84,16 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/auguste-bartholdi-la-liberte-eclairant-le-monde"
   },
   {
-    "title": "Marie et Félix Bracquemond",
+    "title": "Marie et Félix Bracquemond, dessins d'arts décoratifs",
     "venue": "Musée d'Orsay",
     "start": "2026-09-22",
     "end": "2026-12-06",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/marie-et-felix-bracquemond"
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/marie-et-felix-bracquemond-dessins-darts-decoratifs"
   },
   {
     "title": "Maurice Denis",
     "venue": "Musée d'Orsay",
-    "start": "2026-09-29",
+    "start": "2026-10-06",
     "end": "2027-01-10",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
   },
@@ -110,13 +117,6 @@
     "start": "2026-12-15",
     "end": "2027-03-07",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/edouard-vuillard"
-  },
-  {
-    "title": "«Je passe ma vie à peindre»",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-30",
-    "end": "2027-01-24",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/je-passe-ma-vie-peindre"
   },
   {
     "title": "Vertige",
@@ -189,6 +189,13 @@
     "url": "https://parismusees.paris.fr/fr/exposition/kerry-james-marshall"
   },
   {
+    "title": "Nadar : inventer Paris, des profondeurs au ciel",
+    "venue": "Musée d’Art Moderne de Paris",
+    "start": "2026-09-18",
+    "end": "2027-01-24",
+    "url": "https://parismusees.paris.fr/fr/exposition/nadar-inventer-paris-des-profondeurs-au-ciel"
+  },
+  {
     "title": "Simone Fattal",
     "venue": "Musée d’Art Moderne de Paris",
     "start": "2026-09-18",
@@ -196,17 +203,17 @@
     "url": "https://parismusees.paris.fr/fr/exposition/simone-fattal"
   },
   {
-    "title": "Un vestiaire à soi",
-    "venue": "Musée d’Art Moderne de Paris",
-    "start": "2026-09-18",
-    "end": "2027-01-24",
-    "url": "https://parismusees.paris.fr/fr/exposition/un-vestiaire-a-soi"
-  },
-  {
     "title": "L’étoffe de l’artiste",
     "venue": "Musée Bourdelle",
     "start": "2026-09-23",
     "end": "2027-01-24",
     "url": "https://parismusees.paris.fr/fr/exposition/l-etoffe-de-l-artiste"
+  },
+  {
+    "title": "Un vestiaire à soi",
+    "venue": "Palais Galliera",
+    "start": "2026-09-26",
+    "end": "2027-02-14",
+    "url": "https://parismusees.paris.fr/fr/exposition/un-vestiaire-a-soi"
   }
 ]
