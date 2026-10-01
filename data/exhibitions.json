@@ -84,13 +84,6 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/auguste-bartholdi-la-liberte-eclairant-le-monde"
   },
   {
-    "title": "Marie et Félix Bracquemond, dessins d'arts décoratifs",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-22",
-    "end": "2026-12-06",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/marie-et-felix-bracquemond-dessins-darts-decoratifs"
-  },
-  {
     "title": "Maurice Denis",
     "venue": "Musée d'Orsay",
     "start": "2026-10-06",
@@ -110,13 +103,6 @@
     "start": "2026-11-10",
     "end": "2027-02-07",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
-  },
-  {
-    "title": "Édouard Vuillard",
-    "venue": "Musée d'Orsay",
-    "start": "2026-12-15",
-    "end": "2027-03-07",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/edouard-vuillard"
   },
   {
     "title": "Vertige",
@@ -189,13 +175,6 @@
     "url": "https://parismusees.paris.fr/fr/exposition/kerry-james-marshall"
   },
   {
-    "title": "Nadar : inventer Paris, des profondeurs au ciel",
-    "venue": "Musée d’Art Moderne de Paris",
-    "start": "2026-09-18",
-    "end": "2027-01-24",
-    "url": "https://parismusees.paris.fr/fr/exposition/nadar-inventer-paris-des-profondeurs-au-ciel"
-  },
-  {
     "title": "Simone Fattal",
     "venue": "Musée d’Art Moderne de Paris",
     "start": "2026-09-18",
@@ -215,5 +194,12 @@
     "start": "2026-09-26",
     "end": "2027-02-14",
     "url": "https://parismusees.paris.fr/fr/exposition/un-vestiaire-a-soi"
+  },
+  {
+    "title": "Nadar : inventer Paris, des profondeurs au ciel",
+    "venue": "Catacombes de Paris",
+    "start": "2026-09-29",
+    "end": "2027-01-31",
+    "url": "https://parismusees.paris.fr/fr/exposition/nadar-inventer-paris-des-profondeurs-au-ciel"
   }
 ]
