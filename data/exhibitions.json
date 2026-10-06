@@ -63,6 +63,13 @@
     "url": "https://jeudepaume.org/evenement/stan-douglas/"
   },
   {
+    "title": "Vertige",
+    "venue": "Musée d'Orsay",
+    "start": "2026-10-06",
+    "end": "2027-01-17",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vertige-richard-peduzzi-orsay"
+  },
+  {
     "title": "«Je passe ma vie à peindre»",
     "venue": "Musée d'Orsay",
     "start": "2026-09-30",
@@ -91,18 +98,18 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/marie-et-felix-bracquemond-dessins-darts-decoratifs"
   },
   {
-    "title": "Maurice Denis",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-06",
-    "end": "2027-01-10",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
-  },
-  {
     "title": "Échos de l’Invisible",
     "venue": "Musée d'Orsay",
     "start": "2026-10-13",
     "end": "2027-01-03",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/echos-de-linvisible"
+  },
+  {
+    "title": "Maurice Denis",
+    "venue": "Musée d'Orsay",
+    "start": "2026-10-13",
+    "end": "2027-01-10",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
   },
   {
     "title": "Gustave Le Gray",
@@ -119,20 +126,6 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/edouard-vuillard"
   },
   {
-    "title": "Vertige",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-06",
-    "end": "2027-01-17",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vertige-richard-peduzzi-orsay"
-  },
-  {
-    "title": "Mary Cassatt",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-06",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/mary-cassatt-lindependante"
-  },
-  {
     "title": "Jenny Holzer",
     "venue": "Musée d'Orsay",
     "start": "2026-10-20",
@@ -145,13 +138,6 @@
     "start": "2027-03-16",
     "end": "2027-07-18",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/histoires-de-familles"
-  },
-  {
-    "title": "Vuillard",
-    "venue": "Musée d'Orsay",
-    "start": "2027-03-23",
-    "end": "2027-07-25",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vuillard-theatres-intimes"
   },
   {
     "title": "Tisser, broder, sublimer",
