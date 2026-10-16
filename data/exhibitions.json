@@ -119,6 +119,13 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
   },
   {
+    "title": "Gustave Le Gray",
+    "venue": "Musée d'Orsay",
+    "start": "2026-11-10",
+    "end": "2027-02-07",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
+  },
+  {
     "title": "Édouard Vuillard",
     "venue": "Musée d'Orsay",
     "start": "2026-12-15",
@@ -208,5 +215,12 @@
     "start": "2026-10-02",
     "end": "2027-02-07",
     "url": "https://parismusees.paris.fr/fr/exposition/prix-marcel-duchamp-2026"
+  },
+  {
+    "title": "Paris à l'arraché",
+    "venue": "Musée Carnavalet",
+    "start": "2026-10-14",
+    "end": "2027-02-14",
+    "url": "https://parismusees.paris.fr/fr/exposition/paris-a-l-arrache"
   }
 ]
