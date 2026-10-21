@@ -11,49 +11,49 @@
     "venue": "Musée du Louvre",
     "start": "2026-10-07",
     "end": "2027-01-25",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/zurbaran"
+    "url": "https://www.louvre.fr/agenda/expositions/zurbaran"
   },
   {
     "title": "Sculpter la couleur",
     "venue": "Musée du Louvre",
     "start": "2026-10-07",
     "end": "2027-01-25",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/sculpter-la-couleur"
+    "url": "https://www.louvre.fr/agenda/expositions/sculpter-la-couleur"
   },
   {
     "title": "Louvre Photo",
     "venue": "Musée du Louvre",
     "start": "2026-11-04",
     "end": "2027-05-03",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/louvre-photo"
+    "url": "https://www.louvre.fr/agenda/expositions/louvre-photo"
   },
   {
     "title": "L'Eau primordiale",
     "venue": "Musée du Louvre",
     "start": "2026-05-20",
     "end": "2027-03-15",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/l-eau-primordiale-0"
+    "url": "https://www.louvre.fr/agenda/expositions/l-eau-primordiale-0"
   },
   {
     "title": "Affinités",
     "venue": "Musée du Louvre",
     "start": "2026-06-24",
     "end": "2026-12-06",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/affinites-0"
+    "url": "https://www.louvre.fr/agenda/expositions/affinites-0"
   },
   {
     "title": "La donation Michel Lacoste au musée du Louvre",
     "venue": "Musée du Louvre",
     "start": "2026-06-26",
     "end": "2027-01-11",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/la-donation-michel-lacoste-au-musee-du-louvre"
+    "url": "https://www.louvre.fr/agenda/expositions/la-donation-michel-lacoste-au-musee-du-louvre"
   },
   {
     "title": "Les Hôtes du Louvre",
     "venue": "Musée du Louvre",
     "start": "2026-09-24",
     "end": "2026-12-14",
-    "url": "https://www.louvre.fr/expositions-et-evenements/expositions/les-hotes-du-louvre"
+    "url": "https://www.louvre.fr/agenda/expositions/les-hotes-du-louvre"
   },
   {
     "title": "Stan Douglas",
@@ -61,13 +61,6 @@
     "start": "2026-10-20",
     "end": "2027-01-10",
     "url": "https://jeudepaume.org/evenement/stan-douglas/"
-  },
-  {
-    "title": "Jenny Holzer",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-20",
-    "end": "2027-02-21",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/jenny-holzer-jai-vu"
   },
   {
     "title": "«Je passe ma vie à peindre»",
@@ -103,6 +96,13 @@
     "start": "2026-10-06",
     "end": "2027-01-31",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/mary-cassatt-lindependante"
+  },
+  {
+    "title": "Échos de l’Invisible",
+    "venue": "Musée d'Orsay",
+    "start": "2026-10-13",
+    "end": "2027-01-03",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/echos-de-linvisible"
   },
   {
     "title": "Marie et Félix Bracquemond, dessins d'arts décoratifs",
@@ -166,6 +166,13 @@
     "start": "2026-09-15",
     "end": "2027-01-24",
     "url": "https://parismusees.paris.fr/fr/exposition/eva-gonzales-1847-1883"
+  },
+  {
+    "title": "Visionnaires",
+    "venue": "Petit Palais",
+    "start": "2026-09-15",
+    "end": "2027-01-24",
+    "url": "https://parismusees.paris.fr/fr/exposition/visionnaires"
   },
   {
     "title": "Kerry James Marshall",
