@@ -112,11 +112,25 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/echos-de-linvisible"
   },
   {
+    "title": "Marie et Félix Bracquemond, dessins d'arts décoratifs",
+    "venue": "Musée d'Orsay",
+    "start": "2026-09-22",
+    "end": "2026-12-06",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/marie-et-felix-bracquemond-dessins-darts-decoratifs"
+  },
+  {
     "title": "Maurice Denis",
     "venue": "Musée d'Orsay",
     "start": "2026-10-08",
     "end": "2027-01-10",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
+  },
+  {
+    "title": "Gustave Le Gray",
+    "venue": "Musée d'Orsay",
+    "start": "2026-11-10",
+    "end": "2027-02-07",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
   },
   {
     "title": "Édouard Vuillard",
