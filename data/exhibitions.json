@@ -63,6 +63,13 @@
     "url": "https://jeudepaume.org/evenement/stan-douglas/"
   },
   {
+    "title": "Gustave Le Gray",
+    "venue": "Musée d'Orsay",
+    "start": "2026-11-10",
+    "end": "2027-02-07",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
+  },
+  {
     "title": "«Je passe ma vie à peindre»",
     "venue": "Musée d'Orsay",
     "start": "2026-09-30",
@@ -124,13 +131,6 @@
     "start": "2026-10-08",
     "end": "2027-01-10",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
-  },
-  {
-    "title": "Gustave Le Gray",
-    "venue": "Musée d'Orsay",
-    "start": "2026-11-10",
-    "end": "2027-02-07",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
   },
   {
     "title": "Édouard Vuillard",
