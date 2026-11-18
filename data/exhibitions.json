@@ -63,6 +63,13 @@
     "url": "https://jeudepaume.org/evenement/stan-douglas/"
   },
   {
+    "title": "Gustave Le Gray",
+    "venue": "Musée d'Orsay",
+    "start": "2026-11-10",
+    "end": "2027-02-07",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/gustave-le-gray-peintre-photographe"
+  },
+  {
     "title": "«Je passe ma vie à peindre»",
     "venue": "Musée d'Orsay",
     "start": "2026-09-30",
@@ -77,32 +84,11 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vertige-richard-peduzzi-orsay"
   },
   {
-    "title": "Jenny Holzer",
+    "title": "Échos de l’Invisible",
     "venue": "Musée d'Orsay",
-    "start": "2026-10-20",
-    "end": "2027-02-21",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/jenny-holzer-jai-vu"
-  },
-  {
-    "title": "Une statue pour la liberté",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-15",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/une-statue-pour-la-liberte-experience-immersive-en-realite-virtuelle"
-  },
-  {
-    "title": "Auguste Bartholdi",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-15",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/auguste-bartholdi-la-liberte-eclairant-le-monde"
-  },
-  {
-    "title": "Mary Cassatt",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-06",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/mary-cassatt-lindependante"
+    "start": "2026-10-13",
+    "end": "2027-01-03",
+    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/echos-de-linvisible"
   },
   {
     "title": "Histoires de familles",
@@ -110,13 +96,6 @@
     "start": "2027-03-16",
     "end": "2027-07-18",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/histoires-de-familles"
-  },
-  {
-    "title": "Vuillard",
-    "venue": "Musée d'Orsay",
-    "start": "2027-03-23",
-    "end": "2027-07-25",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vuillard-theatres-intimes"
   },
   {
     "title": "Robert Capa, photographe de guerre",
