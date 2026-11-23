@@ -84,41 +84,6 @@
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/vertige-richard-peduzzi-orsay"
   },
   {
-    "title": "Jenny Holzer",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-20",
-    "end": "2027-02-21",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/jenny-holzer-jai-vu"
-  },
-  {
-    "title": "Une statue pour la liberté",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-15",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/une-statue-pour-la-liberte-experience-immersive-en-realite-virtuelle"
-  },
-  {
-    "title": "Auguste Bartholdi",
-    "venue": "Musée d'Orsay",
-    "start": "2026-09-15",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/auguste-bartholdi-la-liberte-eclairant-le-monde"
-  },
-  {
-    "title": "Mary Cassatt",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-06",
-    "end": "2027-01-31",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/mary-cassatt-lindependante"
-  },
-  {
-    "title": "Échos de l’Invisible",
-    "venue": "Musée d'Orsay",
-    "start": "2026-10-13",
-    "end": "2027-01-03",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/echos-de-linvisible"
-  },
-  {
     "title": "Marie et Félix Bracquemond, dessins d'arts décoratifs",
     "venue": "Musée d'Orsay",
     "start": "2026-09-22",
@@ -131,13 +96,6 @@
     "start": "2026-10-08",
     "end": "2027-01-10",
     "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/maurice-denis-illustrer-la-mystique-chretienne"
-  },
-  {
-    "title": "Édouard Vuillard",
-    "venue": "Musée d'Orsay",
-    "start": "2026-12-15",
-    "end": "2027-03-07",
-    "url": "https://www.musee-orsay.fr/fr/programme/agenda/expositions/edouard-vuillard"
   },
   {
     "title": "Histoires de familles",
@@ -196,13 +154,6 @@
     "url": "https://parismusees.paris.fr/fr/exposition/l-etoffe-de-l-artiste"
   },
   {
-    "title": "Corée",
-    "venue": "Palais Galliera",
-    "start": "2026-09-26",
-    "end": "2027-02-14",
-    "url": "https://parismusees.paris.fr/fr/exposition/coree"
-  },
-  {
     "title": "Un vestiaire à soi",
     "venue": "Palais Galliera",
     "start": "2026-09-26",
@@ -236,5 +187,12 @@
     "start": "2026-10-20",
     "end": "2027-01-24",
     "url": "https://parismusees.paris.fr/fr/exposition/visionnaires"
+  },
+  {
+    "title": "Corée",
+    "venue": "Musée Cernuschi",
+    "start": "2026-11-20",
+    "end": "2027-04-04",
+    "url": "https://parismusees.paris.fr/fr/exposition/coree"
   }
 ]
